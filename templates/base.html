@@ -21,7 +21,8 @@
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
     {% endblock %}
 
-    <link rel="icon" type="image/x-icon" href="{% if site_settings.favicon %}{{ site_settings.favicon.url }}{% else %}{% static 'images/favicon.ico' %}{% endif %}">
+    <link rel="icon" href="{% url 'core:favicon' %}?v={{ site_settings.updated_at|date:'U' }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">

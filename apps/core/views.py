@@ -1,9 +1,58 @@
+from pathlib import Path
+
+from django.conf import settings
+from django.contrib.staticfiles import finders
+from django.http import FileResponse, Http404
+from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
+
+from apps.core.models import SiteSettings
 from apps.desktop_apps.models import DesktopApplication
 from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.testimonials.models import Testimonial
 from apps.portfolio.models import Skill, SkillCategory
+
+FAVICON_MIME_TYPES = {
+    '.ico': 'image/x-icon',
+    '.png': 'image/png',
+    '.svg': 'image/svg+xml',
+    '.gif': 'image/gif',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+}
+
+
+@cache_control(public=True, max_age=60 * 60 * 24)
+def favicon(request):
+    """Serve the uploaded favicon, falling back to the bundled icon.
+
+    This uses a stable URL instead of a /media/ URL so the icon still works
+    when media files are not served directly by the web server.
+    """
+    site = SiteSettings.load()
+
+    if site.favicon:
+        try:
+            path = Path(site.favicon.path)
+        except (ValueError, OSError):
+            path = None
+        if path and path.is_file():
+            content_type = FAVICON_MIME_TYPES.get(
+                path.suffix.lower(), 'image/x-icon'
+            )
+            return FileResponse(open(path, 'rb'), content_type=content_type)
+
+    fallback = finders.find('images/favicon.ico')
+    if fallback:
+        return FileResponse(open(fallback, 'rb'), content_type='image/x-icon')
+
+    collected = Path(settings.STATIC_ROOT) / 'images' / 'favicon.ico'
+    if collected.is_file():
+        return FileResponse(open(collected, 'rb'), content_type='image/x-icon')
+
+    raise Http404('Favicon not found')
 
 
 class HomeView(TemplateView):
