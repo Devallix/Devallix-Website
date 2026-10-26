@@ -15,7 +15,7 @@
                         <li class="breadcrumb-item active" style="color:var(--accent-primary);">{{ design.name }}</li>
                     </ol>
                 </nav>
-                <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
                     {% if design.featured %}
                     <span class="badge-custom" style="background:rgba(182,255,0,0.15);color:var(--accent-primary);border-color:rgba(182,255,0,0.3);"><i class="fas fa-star me-1"></i> Featured</span>
                     {% endif %}
@@ -55,23 +55,23 @@
                 <div class="card-custom mb-4" data-aos="fade-left">
                     <h5 class="fw-bold mb-3"><i class="fas fa-info me-2" style="color:var(--accent-primary);"></i>Project Info</h5>
                     <div style="border-top:1px solid var(--border-color);padding-top:1rem;">
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                             <span style="color:var(--text-dim);font-size:0.9rem;">Category</span>
                             <span style="color:var(--text-white);font-size:0.9rem;">{{ design.get_category_display }}</span>
                         </div>
                         {% if design.client %}
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                             <span style="color:var(--text-dim);font-size:0.9rem;">Client</span>
                             <span style="color:var(--text-white);font-size:0.9rem;">{{ design.client }}</span>
                         </div>
                         {% endif %}
                         {% if design.tools %}
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex flex-wrap justify-content-between gap-2 mb-2">
                             <span style="color:var(--text-dim);font-size:0.9rem;">Tools</span>
                             <span style="color:var(--text-white);font-size:0.9rem;text-align:right;">{{ design.tools }}</span>
                         </div>
                         {% endif %}
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex flex-wrap justify-content-between gap-2">
                             <span style="color:var(--text-dim);font-size:0.9rem;">Created</span>
                             <span style="color:var(--text-white);font-size:0.9rem;">{{ design.created_at|date:"M d, Y" }}</span>
                         </div>
@@ -87,7 +87,7 @@
 
                 <div class="card-custom" data-aos="fade-left" data-aos-delay="200">
                     <h5 class="fw-bold mb-3"><i class="fas fa-link me-2" style="color:var(--accent-primary);"></i>Share</h5>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex flex-wrap gap-2">
                         <a href="https://twitter.com/intent/tweet?text={{ design.name }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-sm" style="padding:8px 14px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);">
                             <i class="fab fa-twitter"></i>
                         </a>

@@ -38,7 +38,7 @@
                         "{{ testimonial.review }}"
                     </p>
 
-                    <div class="d-flex align-items-center gap-3 pt-3" style="border-top:1px solid var(--border-color);">
+                    <div class="d-flex flex-wrap align-items-center gap-3 pt-3" style="border-top:1px solid var(--border-color);">
                         {% if testimonial.image %}
                         <img src="{{ testimonial.image.url }}" alt="{{ testimonial.client_name }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
                         {% else %}
@@ -46,7 +46,7 @@
                             <span style="color:var(--bg-primary);font-weight:700;">{{ testimonial.client_name.0 }}</span>
                         </div>
                         {% endif %}
-                        <div>
+                        <div style="min-width:0;">
                             <h6 class="fw-bold mb-0" style="font-size:0.95rem;">{{ testimonial.client_name }}</h6>
                             <small style="color:var(--text-dim);">
                                 {{ testimonial.position }}{% if testimonial.company %} at {{ testimonial.company }}{% endif %}

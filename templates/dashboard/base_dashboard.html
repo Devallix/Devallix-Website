@@ -15,9 +15,10 @@
 <body>
     <div class="d-flex" id="wrapper">
         {% include 'dashboard/includes/sidebar.html' %}
+        <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
         <div id="page-content-wrapper" class="w-100">
             {% include 'dashboard/includes/topbar.html' %}
-            <div class="container-fluid p-4">
+            <div class="container-fluid p-3 p-lg-4">
                 {% if messages %}
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -35,11 +36,57 @@
     <script>
         const toggler = document.querySelector('.sidebar-toggler');
         const wrapper = document.getElementById('wrapper');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const mobileQuery = window.matchMedia('(max-width: 991.98px)');
+
+        function syncSidebarState() {
+            const isOpen = wrapper.classList.contains('toggled');
+            const isMobile = mobileQuery.matches;
+            document.body.classList.toggle('sidebar-open', isOpen && isMobile);
+            if (backdrop) {
+                backdrop.setAttribute('aria-hidden', String(!(isOpen && isMobile)));
+            }
+        }
+
+        function closeSidebar() {
+            wrapper.classList.remove('toggled');
+            syncSidebarState();
+        }
+
         if (toggler) {
-            toggler.addEventListener('click', function() {
+            toggler.addEventListener('click', function () {
                 wrapper.classList.toggle('toggled');
+                syncSidebarState();
             });
         }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeSidebar);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+
+        document.querySelectorAll('.sidebar .nav-link').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (mobileQuery.matches) {
+                    closeSidebar();
+                }
+            });
+        });
+
+        mobileQuery.addEventListener('change', function (event) {
+            if (!event.matches) {
+                closeSidebar();
+            } else {
+                syncSidebarState();
+            }
+        });
+
+        syncSidebarState();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

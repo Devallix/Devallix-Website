@@ -78,6 +78,7 @@ a { text-decoration: none; color: inherit; transition: all 0.2s; }
 }
 
 .sidebar .sidebar-brand h5 { font-weight: 700; margin: 0; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar .sidebar-brand > div { min-width: 0; }
 .sidebar .sidebar-brand small { color: var(--text-dim); font-size: 0.7rem; }
 
 .sidebar-nav { padding: 1rem 0; }
@@ -105,8 +106,13 @@ a { text-decoration: none; color: inherit; transition: all 0.2s; }
 
 #page-content-wrapper {
     min-height: 100vh;
+    min-width: 0;
     margin-left: var(--sidebar-width);
     transition: margin-left 0.3s;
+}
+
+.sidebar-backdrop {
+    display: none;
 }
 
 #wrapper.toggled .sidebar {
@@ -382,8 +388,185 @@ a { text-decoration: none; color: inherit; transition: all 0.2s; }
     margin: 1.5rem 0;
 }
 
-@media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); }
-    #wrapper.toggled .sidebar { transform: translateX(0); }
-    #wrapper.toggled #page-content-wrapper { margin-left: 0; }
+/* =============================================
+   RESPONSIVE — TABLET & MOBILE
+   ============================================= */
+
+@media (max-width: 991.98px) {
+    /* Off-canvas sidebar */
+    .sidebar {
+        width: min(280px, 84vw);
+        height: 100dvh;
+        transform: translateX(-100%);
+        z-index: 1050;
+        box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5);
+        will-change: transform;
+    }
+
+    #wrapper.toggled .sidebar {
+        transform: translateX(0);
+    }
+
+    /* Content always uses full width; sidebar overlays it */
+    #page-content-wrapper,
+    #wrapper.toggled #page-content-wrapper {
+        margin-left: 0;
+    }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+        z-index: 1040;
+    }
+
+    #wrapper.toggled .sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+        padding: 0 1rem;
+        gap: 0.75rem;
+    }
+
+    .topbar > div {
+        min-width: 0;
+    }
+
+    .topbar > div:first-child {
+        flex: 1 1 auto;
+    }
+
+    .topbar h6 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Page headers and toolbars */
+    .page-section > .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .dashboard-card > .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .dashboard-card > .d-flex.justify-content-between form {
+        flex: 1 1 240px;
+        max-width: 100% !important;
+    }
+
+    .dashboard-card form .form-control,
+    .dashboard-card form .form-select {
+        min-width: 0;
+    }
+
+    .page-section .d-flex.justify-content-between > .d-flex {
+        flex-wrap: wrap;
+    }
+
+    .form-dashboard {
+        padding: 1.5rem;
+    }
+
+    /* Tables scroll horizontally instead of squashing */
+    .table-dashboard {
+        min-width: 640px;
+    }
+
+    #page-content-wrapper {
+        overflow-wrap: break-word;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .page-section {
+        padding: 1.25rem 0;
+    }
+
+    .page-title {
+        font-size: 1.3rem;
+    }
+
+    .topbar .btn {
+        padding: 0.35rem 0.6rem;
+    }
+
+    .dashboard-card {
+        padding: 1.25rem;
+        border-radius: 14px;
+    }
+
+    .dashboard-card .card-value {
+        font-size: 1.65rem;
+    }
+
+    .dashboard-card .card-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 1.05rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-dashboard {
+        padding: 1.25rem;
+        border-radius: 14px;
+    }
+
+    .dashboard-card .d-flex.justify-content-end {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .dashboard-card .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    .table-dashboard th,
+    .table-dashboard td {
+        padding: 0.65rem 0.75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .topbar {
+        padding: 0 0.75rem;
+    }
+
+    .dashboard-card {
+        padding: 1rem;
+    }
+
+    .form-dashboard {
+        padding: 1rem;
+    }
+
+    .dashboard-card .card-value {
+        font-size: 1.5rem;
+    }
+
+    .page-section > .d-flex.justify-content-between > .btn,
+    .page-section > .d-flex.justify-content-between > a.btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .empty-state {
+        padding: 2.5rem 1rem;
+    }
 }

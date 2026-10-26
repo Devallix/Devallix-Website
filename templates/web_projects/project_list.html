@@ -55,7 +55,7 @@
             </form>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4" data-aos="fade-up">
             <p style="color:var(--text-muted);margin:0;">Showing <strong style="color:var(--accent-primary);">{{ total_count }}</strong> project{{ total_count|pluralize }}</p>
             {% if selected_tech or search_query %}
             <a href="{% url 'web_projects:project_list' %}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;">
@@ -96,11 +96,11 @@
                             <span class="badge-custom" style="font-size:0.7rem;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);">+{{ project.technologies.count|add:"-4" }}</span>
                             {% endif %}
                         </div>
-                        <div class="d-flex align-items-center justify-content-between pt-3" style="border-top:1px solid var(--border-color);">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-3" style="border-top:1px solid var(--border-color);">
                             <span style="color:var(--text-dim);font-size:0.8rem;">
                                 <i class="far fa-calendar me-1"></i>{{ project.created_at|date:"M Y" }}
                             </span>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex flex-wrap gap-2">
                                 {% if project.live_demo_url %}
                                 <a href="{{ project.live_demo_url }}" target="_blank" class="btn btn-sm" style="padding:6px 10px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);" title="Live Demo">
                                     <i class="fas fa-external-link-alt"></i>

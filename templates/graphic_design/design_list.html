@@ -54,7 +54,7 @@
             </form>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-up">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4" data-aos="fade-up">
             <p style="color:var(--text-muted);margin:0;">Showing <strong style="color:var(--accent-primary);">{{ total_count }}</strong> design{{ total_count|pluralize }}</p>
             {% if current_category or search_query %}
             <a href="{% url 'graphic_design:design_list' %}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;">
@@ -87,7 +87,7 @@
                         </div>
                         <h5 class="fw-bold mb-2">{{ design.name }}</h5>
                         <p style="color:var(--text-muted);font-size:0.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:1rem;">{{ design.short_description }}</p>
-                        <div class="d-flex align-items-center justify-content-between pt-3" style="border-top:1px solid var(--border-color);">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-3" style="border-top:1px solid var(--border-color);">
                             <span style="color:var(--text-dim);font-size:0.8rem;">
                                 {% if design.client %}<i class="fas fa-user me-1"></i>{{ design.client }}{% else %}<i class="far fa-calendar me-1"></i>{{ design.created_at|date:"M Y" }}{% endif %}
                             </span>

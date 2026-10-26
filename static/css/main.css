@@ -1698,6 +1698,8 @@ h1, h2, h3, h4, h5, h6 {
         border-top: 1px solid rgba(182, 255, 0, 0.1);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         animation: mobileNavIn 0.3s ease;
+        max-height: calc(100dvh - 90px);
+        overflow-y: auto;
     }
 
     @keyframes mobileNavIn {
@@ -2041,5 +2043,190 @@ h1, h2, h3, h4, h5, h6 {
     .btn-secondary-custom {
         padding: 10px 20px;
         font-size: 0.88rem;
+    }
+}
+
+/* =============================================
+   RESPONSIVE POLISH — OVERFLOW SAFETY NET
+   ============================================= */
+
+#main-content {
+    overflow-wrap: break-word;
+}
+
+footer {
+    overflow-wrap: anywhere;
+}
+
+#main-content img {
+    max-width: 100%;
+}
+
+.pagination,
+.pagination-custom {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.input-group > .form-control,
+.input-group > .form-select,
+.input-group > .form-floating {
+    min-width: 0;
+}
+
+/* Prevent long words/URLs from forcing horizontal scroll */
+.section-title,
+.card-custom h1,
+.card-custom h2,
+.card-custom h3,
+.card-custom h4,
+.card-custom p,
+.card-custom a,
+.breadcrumb-item {
+    overflow-wrap: anywhere;
+}
+
+/* Detail pages use inline heading sizes — tame them on smaller screens */
+@media (max-width: 991.98px) {
+    .page-header h1[style*="font-size"] {
+        font-size: 2rem !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .page-header h1[style*="font-size"] {
+        font-size: 1.65rem !important;
+        line-height: 1.25;
+    }
+
+    .breadcrumb {
+        font-size: 0.82rem;
+    }
+
+    .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .card-custom .d-flex.justify-content-between,
+    .card-custom .d-flex.justify-content-between.align-items-center {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .card-custom .card-actions,
+    .card-custom .action-buttons {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .card-custom > .d-flex:last-child:not(:first-child) {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .page-header .btn,
+    .page-header .btn-primary-custom,
+    .page-header .btn-outline-custom {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .page-header h1[style*="font-size"] {
+        font-size: 1.45rem !important;
+    }
+
+    .card-custom {
+        padding: 1.1rem;
+    }
+
+    .breadcrumb {
+        font-size: 0.76rem;
+    }
+
+    .section-title {
+        overflow-wrap: anywhere;
+    }
+
+    .brand-text {
+        max-width: 52vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .navbar-brand {
+        min-width: 0;
+    }
+
+    .badge-custom {
+        max-width: 100%;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .icon-box {
+        width: 40px;
+        height: 40px;
+        font-size: 0.95rem;
+    }
+}
+
+/* =============================================
+   MOBILE ALIGNMENT POLISH
+   ============================================= */
+
+/* Ultra-narrow phones: hide apps-submenu icons and center the text */
+@media (max-width: 306.98px) {
+    .apps-menu .dropdown-item.apps-menu-item {
+        justify-content: center;
+        text-align: center;
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+
+    .apps-menu .apps-menu-icon {
+        display: none;
+    }
+
+    .apps-menu-text {
+        align-items: center;
+        text-align: center;
+    }
+
+    .apps-menu-header {
+        text-align: center;
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+}
+
+/* About page: center Who I Am and Mission/Vision content on phones */
+@media (max-width: 767.98px) {
+    .about-who-i-am {
+        text-align: center;
+    }
+
+    .about-who-i-am .about-feature {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .about-pillar-card {
+        text-align: center;
+    }
+
+    .about-pillar-icon {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Home "What I Do": center the card icons on phones */
+@media (max-width: 767.98px) {
+    .service-card .service-icon {
+        margin-left: auto;
+        margin-right: auto;
     }
 }
