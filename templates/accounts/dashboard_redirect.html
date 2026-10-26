@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center" style="padding:200px 0;">
+    <div class="loader" style="margin:0 auto;"></div>
+    <p style="color:var(--text-muted);margin-top:1rem;">Redirecting to dashboard...</p>
+</div>
+<script>
+    window.location.href = "{% url 'dashboard:dashboard_home' %}";
+</script>
+{% endblock %}

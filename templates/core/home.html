@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<!-- ========== HERO ========== -->
+<section class="hero-section" id="heroSection">
+    <canvas id="heroParticles" class="hero-canvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-glow-line"></div>
+
+    <div class="container hero-container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7" data-aos="fade-right" data-aos-delay="200">
+                <div class="d-flex gap-2 mb-4">
+                    <span class="badge-custom"><i class="fas fa-code me-1"></i> 👋 — Full-Stack Developer & Designer</span>
+                    <span class="badge-custom" style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);"><i class="fas fa-rocket me-1"></i> Available for Hire</span>
+                </div>
+                <h1 class="hero-title">
+                    Hi, <span class="gradient-text">Devallix</span> here!<br>
+                     <span class="gradient-text" id="typed-output" data-texts='["Transforming ideas into innovative digital solutions.","Building digital experiences.","Lets build something beautiful together.","If you can think it, I can build it."]'></span><span class="typing-cursor"></span>
+                </h1>
+                <p class="hero-subtitle">
+                    I design and engineer custom desktop apps, mobile experiences, and modern web applications from the ground up. Explore my work, test-drive my tools, or hire me to bring your next big idea to life.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'portfolio:portfolio' %}" class="btn btn-primary-custom btn-lg hero-btn">
+                        <i class="fas fa-layer-group"></i> View Portfolio
+                    </a>
+                    <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom btn-lg hero-btn">
+                        <i class="fas fa-download"></i> Download Apps
+                    </a>
+                    <a href="{% url 'contact:contact' %}" class="btn-hire-me hero-btn">
+                        <span class="corner-tr"></span>
+                        <span class="corner-bl"></span>
+                        <span class="hire-bg"></span>
+                        <span class="hire-text"><i class="fas fa-envelope hire-icon"></i> Hire Me</span>
+                    </a>
+                </div>
+                <div class="hero-social-row mt-5">
+                    {% if site_settings.github_url %}
+                    <a href="{{ site_settings.github_url }}" class="hero-social-link" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+                    {% endif %}
+                    {% if site_settings.linkedin_url %}
+                    <a href="{{ site_settings.linkedin_url }}" class="hero-social-link" target="_blank" rel="noopener"><i class="fab fa-linkedin-in"></i></a>
+                    {% endif %}
+                    {% if site_settings.twitter_url %}
+                    <a href="{{ site_settings.twitter_url }}" class="hero-social-link" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>
+                    {% endif %}
+                    {% if not site_settings.github_url and not site_settings.linkedin_url and not site_settings.twitter_url %}
+                    <a href="#" class="hero-social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="hero-social-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="hero-social-link"><i class="fab fa-twitter"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-5 text-center" data-aos="fade-left" data-aos-delay="400">
+                <div class="hero-visual">
+                    <div class="hero-visual-main">
+                        <div class="hero-visual-inner">
+                            <i class="fas fa-code hero-visual-icon"></i>
+                            <p class="hero-visual-code">&lt;developer&gt;<br>&nbsp;&nbsp;passion = true;<br>&nbsp;&nbsp;attribute = 'Professional';<br>&lt;/developer&gt;</p>
+                        </div>
+                    </div>
+                    <div class="hero-badge hero-badge-primary animate-pulse"><i class="fas fa-star"></i></div>
+                    <div class="hero-badge hero-badge-secondary"><i class="fas fa-laptop-code"></i></div>
+                    <div class="hero-badge hero-badge-accent"><i class="fas fa-rocket"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-scroll-indicator">
+        <div class="hero-scroll-mouse">
+            <div class="hero-scroll-wheel"></div>
+        </div>
+        <span>Scroll Down</span>
+    </div>
+</section>
+
+<!-- ========== STATISTICS ========== -->
+<section class="counter-section section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6 text-center" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-3">
+                    <div class="stat-icon" style="background:rgba(182,255,0,0.1);"><i class="fas fa-desktop" style="color:var(--accent-primary);"></i></div>
+                    <h3 class="fw-bold stat-value"><span data-counter="{{ stats.apps_built|default:0 }}">0</span>+</h3>
+                    <p style="color:var(--text-muted);">Desktop Apps</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 text-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="p-3">
+                    <div class="stat-icon" style="background:rgba(0,217,255,0.1);"><i class="fas fa-globe" style="color:var(--accent-secondary);"></i></div>
+                    <h3 class="fw-bold stat-value"><span data-counter="{{ stats.web_projects|default:0 }}">0</span>+</h3>
+                    <p style="color:var(--text-muted);">Web Apps</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 text-center" data-aos="fade-up" data-aos-delay="300">
+                <div class="p-3">
+                    <div class="stat-icon" style="background:rgba(182,255,0,0.1);"><i class="fas fa-download" style="color:var(--accent-primary);"></i></div>
+                    <h3 class="fw-bold stat-value"><span data-counter="{{ stats.total_downloads|default:0 }}">0</span>+</h3>
+                    <p style="color:var(--text-muted);">Total Downloads</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 text-center" data-aos="fade-up" data-aos-delay="400">
+                <div class="p-3">
+                    <div class="stat-icon" style="background:rgba(0,217,255,0.1);"><i class="fas fa-calendar-alt" style="color:var(--accent-secondary);"></i></div>
+                    <h3 class="fw-bold stat-value"><span data-counter="2">0</span>+</h3>
+                    <p style="color:var(--text-muted);">Years Experience</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SERVICES ========== -->
+<section class="section-padding bg-secondary-custom" id="services">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-laptop-code me-1"></i> What I Do</span>
+            <h2 class="section-title">End-to-End <span class="accent">Digital Solutions</span> Built for Impact</h2>
+            <div class="divider divider-center" style="background:var(--accent-secondary);"></div>
+            <p class="section-subtitle">Whether you need a high-performance application from scratch or a striking brand identity, I combine technical expertise with creative design to bring your vision to life.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Service 1: Software & App Development -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-custom h-100 hover-lift service-card">
+                    <div class="service-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h5 class="fw-bold mb-3"><i class="fas fa-code me-2"></i> Software &amp; App Development</h5>
+                    <p style="color:var(--text-muted);font-size:0.95rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:1.5rem;">
+                        Custom-built, scalable digital products designed for performance and seamless user experience across all platforms.
+                    </p>
+                    <div class="service-offerings">
+                        <h6 class="fw-bold mb-2">Key Offerings</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-desktop me-2"></i> Desktop Apps: Native and cross-platform desktop software (Windows, macOS, Linux).</li>
+                            <li><i class="fas fa-globe me-2"></i> Web Apps: Feature-rich, responsive web applications tailored to your business logic.</li>
+                            <li><i class="fas fa-mobile-alt me-2"></i> Mobile Apps: Intuitive and smooth mobile experiences for iOS and Android.</li>
+                            <li><i class="fas fa-code me-2"></i> Websites: Fast, modern, and SEO-optimized business websites and portfolios.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service 2: Creative Design & Branding -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-custom h-100 hover-lift service-card">
+                    <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
+                    <h5 class="fw-bold mb-3"><i class="fas fa-magic me-2"></i> Creative Design &amp; Branding</h5>
+                    <p style="color:var(--text-muted);font-size:0.95rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:1.5rem;">
+                        Eye-catching visual identities and marketing materials that capture attention, build trust, and elevate your brand.
+                    </p>
+                    <div class="service-offerings">
+                        <h6 class="fw-bold mb-2">Key Offerings</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-eye me-2"></i> Logos &amp; Brand Identity: Memorable, unique logos and visual systems that set you apart.</li>
+                            <li><i class="fas fa-bullhorn me-2"></i> Marketing Flyers: Engaging, professionally designed promotional flyers for digital and print.</li>
+                            <li><i class="fas fa-id-card me-2"></i> Business Cards: Sleek, modern business card designs that leave a lasting impression.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service 3: Growth & Optimization -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="card-custom h-100 hover-lift service-card">
+                    <div class="service-icon"><i class="fas fa-rocket"></i></div>
+                    <h5 class="fw-bold mb-3"><i class="fas fa-chart-line me-2"></i> Growth &amp; Optimization</h5>
+                    <p style="color:var(--text-muted);font-size:0.95rem;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:1.5rem;">
+                        Ensuring your digital presence doesn't just look good, but actively reaches your target audience and ranks higher.
+                    </p>
+                    <div class="service-offerings">
+                        <h6 class="fw-bold mb-2">Key Offerings</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-search me-2"></i> Search Engine Optimization (SEO): Optimizing your websites and web apps for maximum visibility on search engines.</li>
+                            <li><i class="fas fa-tachometer-alt me-2"></i> Performance Audits &amp; Upgrades: Speeding up existing apps and fixing critical bottlenecks.</li>
+                            <li><i class="fas fa-cogs me-2"></i> Custom Technical Solutions: Tailored scripts, API integrations, and ongoing maintenance.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Footer / Call-to-Action -->
+        <div class="text-center mt-5" data-aos="fade-up">
+            <div class="cta-section" style="max-width:700px;margin:0 auto;">
+                <p class="section-subtitle mb-4">Have a unique project in mind that doesn't fit neatly into a box? Let's talk about it!</p>
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary-custom btn-lg"><i class="fas fa-rocket me-2"></i> Get a Custom Quote / Hire Me</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== FEATURED APPLICATIONS ========== -->
+{% if featured_apps %}
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-star me-1"></i> Featured</span>
+            <h2 class="section-title">Featured <span class="accent">Desktop Apps</span></h2>
+            <div class="divider divider-center"></div>
+            <p class="section-subtitle">Explore my latest desktop applications available for download.</p>
+        </div>
+        <div class="row g-4">
+            {% for app in featured_apps %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|divisibleby:3|yesno:'100,200,300' }}">
+                <div class="card-custom h-100 hover-lift">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        {% if app.logo %}
+                        <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;">
+                        {% else %}
+                        <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-cube" style="color:var(--bg-primary);font-size:1.3rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ app.name }}</h5>
+                            <small style="color:var(--text-dim);">v{{ app.version }} &middot; {{ app.get_platform_display }}</small>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-muted);font-size:0.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ app.short_description }}</p>
+                    <div class="d-flex align-items-center justify-content-between mt-auto pt-3" style="border-top:1px solid var(--border-color);">
+                        <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-download me-1"></i>{{ app.download_count|intcomma }} downloads</span>
+                        <div class="d-flex gap-2">
+                            <a href="{{ app.get_absolute_url }}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;"><i class="fas fa-info-circle"></i> Details</a>
+                            {% if app.installer_file %}
+                            <a href="{% url 'desktop_apps:download_app' app.slug %}" class="btn btn-sm btn-primary-custom" style="padding:6px 14px;"><i class="fas fa-download"></i> Download</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom btn-lg"><i class="fas fa-th-large"></i> View All Desktop Apps</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== PROJECTS SHOWCASE (from Dashboard) ========== -->
+<section class="section-padding bg-secondary-custom position-relative overflow-hidden">
+    <div class="position-absolute top-0 start-0 w-100 h-100" style="background:radial-gradient(circle at 10% 20%, rgba(182,255,0,0.03) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(0,217,255,0.03) 0%, transparent 40%);pointer-events:none;"></div>
+    <div class="container position-relative" style="z-index:1;">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom" style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);"><i class="fas fa-folder-open me-1"></i> Portfolio</span>
+            <h2 class="section-title mt-3">Latest <span class="text-accent-secondary">Web Apps</span></h2>
+            <div class="divider divider-center" style="background:var(--accent-secondary);"></div>
+            <p class="section-subtitle">A showcase of web applications and projects I've built and published.</p>
+        </div>
+
+        <div class="row g-4">
+            {% for project in latest_projects %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|divisibleby:3|yesno:'100,200,300' }}">
+                <div class="card-custom h-100 hover-lift project-card">
+                    {% if project.image %}
+                    <div class="project-card-image">
+                        <img src="{{ project.image.url }}" alt="{{ project.name }}">
+                        <div class="project-card-overlay">
+                            {% if project.live_demo_url %}
+                            <a href="{{ project.live_demo_url }}" class="project-overlay-btn" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                            {% endif %}
+                            {% if project.github_url %}
+                            <a href="{{ project.github_url }}" class="project-overlay-btn" target="_blank"><i class="fab fa-github"></i></a>
+                            {% endif %}
+                            <a href="{{ project.get_absolute_url }}" class="project-overlay-btn"><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="project-card-image project-card-placeholder">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            {% if project.featured %}
+                            <span class="badge-custom" style="font-size:0.65rem;"><i class="fas fa-star me-1"></i> Featured</span>
+                            {% endif %}
+                            <span class="badge-custom" style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);font-size:0.65rem;">{{ project.get_status_display }}</span>
+                        </div>
+                        <h5 class="fw-bold">{{ project.name }}</h5>
+                        <p style="color:var(--text-muted);font-size:0.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ project.short_description }}</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for tech in project.technologies.all|slice:":3" %}
+                            <span class="badge-custom" style="font-size:0.7rem;">{{ tech.name }}</span>
+                            {% endfor %}
+                            {% if project.technologies.count > 3 %}
+                            <span class="badge-custom" style="font-size:0.7rem;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);">+{{ project.technologies.count|add:"-3" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-2">
+                            {% if project.live_demo_url %}
+                            <a href="{{ project.live_demo_url }}" class="btn btn-sm btn-primary-custom" target="_blank" style="padding:6px 14px;"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+                            {% endif %}
+                            {% if project.github_url %}
+                            <a href="{{ project.github_url }}" class="btn btn-sm btn-outline-custom" target="_blank" style="padding:6px 14px;"><i class="fab fa-github"></i> Code</a>
+                            {% endif %}
+                            <a href="{{ project.get_absolute_url }}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;"><i class="fas fa-info-circle"></i> Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center" data-aos="fade-up">
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <h3>Web Apps Coming Soon</h3>
+                    <p>New projects are being added regularly. Check back soon!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'web_projects:project_list' %}" class="btn btn-secondary-custom btn-lg"><i class="fas fa-th-large"></i> View All Web Apps</a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== FEATURED MOBILE APPS ========== -->
+{% if featured_mobile_apps %}
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-mobile-alt me-1"></i> Featured</span>
+            <h2 class="section-title">Featured <span class="accent">Mobile Apps</span></h2>
+            <div class="divider divider-center"></div>
+            <p class="section-subtitle">Android, iOS, and cross-platform apps built for life on the go.</p>
+        </div>
+        <div class="row g-4">
+            {% for app in featured_mobile_apps %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|divisibleby:3|yesno:'100,200,300' }}">
+                <div class="card-custom h-100 hover-lift" style="padding:0;overflow:hidden;">
+                    {% if app.image %}
+                    <div style="height:200px;overflow:hidden;">
+                        <img src="{{ app.image.url }}" alt="{{ app.name }}" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    {% elif app.logo %}
+                    <div style="height:200px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));display:flex;align-items:center;justify-content:center;">
+                        <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:96px;height:96px;border-radius:22px;object-fit:cover;">
+                    </div>
+                    {% else %}
+                    <div style="height:200px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-mobile-alt" style="font-size:3rem;color:var(--text-dim);"></i>
+                    </div>
+                    {% endif %}
+                    <div class="p-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge-custom" style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);font-size:0.65rem;">{{ app.get_platform_display }}</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ app.name }}</h5>
+                        <p style="color:var(--text-muted);font-size:0.9rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:1rem;">{{ app.short_description }}</p>
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            {% for tech in app.technologies.all|slice:":4" %}
+                            <span class="badge-custom" style="font-size:0.7rem;">{{ tech.name }}</span>
+                            {% endfor %}
+                            {% if app.technologies.count > 4 %}
+                            <span class="badge-custom" style="font-size:0.7rem;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);">+{{ app.technologies.count|add:"-4" }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between pt-3" style="border-top:1px solid var(--border-color);">
+                            <span style="color:var(--text-dim);font-size:0.8rem;"><i class="fas fa-code-branch me-1"></i>v{{ app.version }}</span>
+                            <div class="d-flex gap-2">
+                                {% if app.play_store_url %}
+                                <a href="{{ app.play_store_url }}" target="_blank" class="btn btn-sm" style="padding:6px 10px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);" title="Google Play">
+                                    <i class="fab fa-google-play"></i>
+                                </a>
+                                {% endif %}
+                                {% if app.app_store_url %}
+                                <a href="{{ app.app_store_url }}" target="_blank" class="btn btn-sm" style="padding:6px 10px;background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid var(--border-color);border-radius:var(--radius-sm);" title="App Store">
+                                    <i class="fab fa-apple"></i>
+                                </a>
+                                {% endif %}
+                                <a href="{{ app.get_absolute_url }}" class="btn btn-sm btn-primary-custom" style="padding:6px 14px;"><i class="fas fa-info-circle"></i> Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{% url 'mobile_apps:app_list' %}" class="btn btn-outline-custom btn-lg"><i class="fas fa-th-large"></i> View All Mobile Apps</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== TECHNOLOGY STACK ========== -->
+{% if skills %}
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-tools me-1"></i> Tech Stack</span>
+            <h2 class="section-title">Technology <span class="accent">Stack</span></h2>
+            <div class="divider divider-center"></div>
+            <p class="section-subtitle">Technologies and tools I use to bring ideas to life.</p>
+        </div>
+        <div class="row g-4">
+            {% for skill in skills %}
+            <div class="col-lg-2 col-md-3 col-4" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|divisibleby:3|yesno:'100,200,300' }}">
+                <div class="card-custom text-center p-3 h-100" style="border-radius:var(--radius-md);">
+                    <div style="width:50px;height:50px;border-radius:12px;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 0.5rem;">
+                        {% if skill.icon %}<i class="{{ skill.icon }}" style="font-size:1.3rem;color:var(--accent-primary);"></i>
+                        {% else %}<i class="fas fa-code" style="font-size:1.3rem;color:var(--accent-primary);"></i>{% endif %}
+                    </div>
+                    <small style="color:var(--text-muted);font-weight:500;">{{ skill.name }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4" data-aos="fade-up">
+            <a href="{% url 'core:skills' %}" class="btn btn-outline-custom"><i class="fas fa-arrow-right"></i> View All Skills</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== TESTIMONIALS ========== -->
+{% if testimonials %}
+<section class="section-padding bg-secondary-custom">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-quote-left me-1"></i> Testimonials</span>
+            <h2 class="section-title">What Clients <span class="accent">Say</span></h2>
+            <div class="divider divider-center"></div>
+        </div>
+        <div class="swiper" data-aos="fade-up">
+            <div class="swiper-wrapper">
+                {% for testimonial in testimonials %}
+                <div class="swiper-slide">
+                    <div class="card-custom h-100">
+                        <div class="d-flex gap-1 mb-3">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= testimonial.rating %}
+                            <i class="fas fa-star" style="color:var(--accent-primary);"></i>
+                            {% else %}<i class="far fa-star" style="color:var(--text-dim);"></i>{% endif %}
+                            {% endfor %}
+                        </div>
+                        <p style="color:var(--text-muted);font-style:italic;margin-bottom:1.5rem;">"{{ testimonial.review }}"</p>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if testimonial.image %}
+                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.client_name }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+                            {% else %}
+                            <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span style="color:var(--bg-primary);font-weight:700;">{{ testimonial.client_name.0 }}</span>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h6 class="fw-bold mb-0" style="font-size:0.95rem;">{{ testimonial.client_name }}</h6>
+                                <small style="color:var(--text-dim);">{{ testimonial.position }}{% if testimonial.company %} at {{ testimonial.company }}{% endif %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination mt-4"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== CTA ========== -->
+<section class="section-padding">
+    <div class="container">
+        <div class="cta-section text-center" data-aos="fade-up">
+            <h2 class="section-title mb-3" style="font-size:2.2rem;">Let's Build Something <span class="accent">Amazing</span> Together</h2>
+            <p class="section-subtitle mx-auto">Have a project in mind? Need a custom application? Let's discuss how we can work together to bring your vision to life.</p>
+            <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary-custom btn-lg"><i class="fas fa-envelope"></i> Get In Touch</a>
+                <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom btn-lg"><i class="fas fa-download"></i> Desktop Apps</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== NEWSLETTER ========== -->
+<section class="section-padding bg-secondary-custom">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center" data-aos="fade-up">
+                <div style="width:70px;height:70px;border-radius:50%;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+                    <i class="fas fa-paper-plane" style="font-size:1.5rem;color:var(--accent-primary);"></i>
+                </div>
+                <h3 class="fw-bold mb-3">Stay <span class="accent">Updated</span></h3>
+                <p style="color:var(--text-muted);margin-bottom:2rem;">Subscribe to get notified about new applications, updates, and blog posts.</p>
+                <form method="post" action="{% url 'newsletter:subscribe' %}" class="d-flex gap-2 justify-content-center" style="max-width:500px;margin:0 auto;">
+                    {% csrf_token %}
+                    <input type="email" name="email" class="form-control form-control-custom" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-primary-custom flex-shrink-0"><i class="fas fa-paper-plane"></i> Subscribe</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

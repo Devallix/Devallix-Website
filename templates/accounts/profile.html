@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Profile - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center" data-aos="fade-up">
+                <h1 class="section-title">My <span class="accent">Profile</span></h1>
+                <p class="section-subtitle">Manage your account settings.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card-custom" data-aos="fade-up">
+                    <div class="d-flex align-items-center gap-4 mb-4 pb-4" style="border-bottom:1px solid var(--border-color);">
+                        <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                            {% else %}
+                            <span style="color:var(--bg-primary);font-weight:800;font-size:2rem;">{{ user.first_name.0|default:user.username.0|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                            <p style="color:var(--text-muted);margin:0;">{{ user.job_title|default:'Software Developer' }}</p>
+                            <p style="color:var(--text-dim);font-size:0.85rem;margin:0;">
+                                <i class="fas fa-envelope me-1"></i> {{ user.email }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold" style="color:var(--accent-primary);">Personal Information</h6>
+                            <ul class="list-unstyled" style="color:var(--text-muted);">
+                                <li class="mb-2"><i class="fas fa-user me-2"></i>{{ user.get_full_name|default:'Not set' }}</li>
+                                <li class="mb-2"><i class="fas fa-envelope me-2"></i>{{ user.email }}</li>
+                                <li class="mb-2"><i class="fas fa-phone me-2"></i>{{ user.phone|default:'Not set' }}</li>
+                                <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ user.location|default:'Not set' }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold" style="color:var(--accent-secondary);">Social Links</h6>
+                            <ul class="list-unstyled" style="color:var(--text-muted);">
+                                {% if user.website %}
+                                <li class="mb-2"><i class="fas fa-globe me-2"></i><a href="{{ user.website }}" target="_blank">{{ user.website }}</a></li>
+                                {% endif %}
+                                {% if user.github %}
+                                <li class="mb-2"><i class="fab fa-github me-2"></i><a href="{{ user.github }}" target="_blank">GitHub</a></li>
+                                {% endif %}
+                                {% if user.linkedin %}
+                                <li class="mb-2"><i class="fab fa-linkedin me-2"></i><a href="{{ user.linkedin }}" target="_blank">LinkedIn</a></li>
+                                {% endif %}
+                                {% if user.twitter %}
+                                <li class="mb-2"><i class="fab fa-twitter me-2"></i><a href="{{ user.twitter }}" target="_blank">Twitter</a></li>
+                                {% endif %}
+                                {% if not user.website and not user.github and not user.linkedin and not user.twitter %}
+                                <li style="color:var(--text-dim);">No social links added yet.</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if user.bio %}
+                    <div class="mt-4 pt-4" style="border-top:1px solid var(--border-color);">
+                        <h6 class="fw-bold" style="color:var(--accent-primary);">About</h6>
+                        <p style="color:var(--text-muted);">{{ user.bio }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-3 mt-4 pt-4" style="border-top:1px solid var(--border-color);">
+                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary-custom">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-custom">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                        {% if user.is_staff %}
+                        <a href="{% url 'dashboard:dashboard_home' %}" class="btn btn-secondary-custom">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

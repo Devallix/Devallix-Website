@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Portfolio - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <span class="badge-custom mb-3"><i class="fas fa-layer-group me-1"></i> Portfolio</span>
+                <h1 class="section-title">My <span class="accent">Portfolio</span></h1>
+                <div class="divider divider-center"></div>
+                <p class="section-subtitle">A showcase of my desktop apps, web apps, mobile apps, and graphic design work.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <!-- Desktop Apps -->
+        <div class="mb-5" data-aos="fade-up">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:50px;height:50px;border-radius:12px;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-desktop" style="font-size:1.3rem;color:var(--accent-primary);"></i>
+                </div>
+                <h3 class="fw-bold mb-0">Desktop <span class="accent">Apps</span></h3>
+            </div>
+            <div class="text-center mb-4">
+                <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom">
+                    <i class="fas fa-arrow-right"></i> View All Desktop Apps
+                </a>
+            </div>
+        </div>
+
+        <!-- Web Apps -->
+        <div class="mb-5" data-aos="fade-up" data-aos-delay="100">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:50px;height:50px;border-radius:12px;background:rgba(0,217,255,0.1);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-globe" style="font-size:1.3rem;color:var(--accent-secondary);"></i>
+                </div>
+                <h3 class="fw-bold mb-0">Web <span class="text-accent-secondary">Apps</span></h3>
+            </div>
+            <div class="text-center mb-4">
+                <a href="{% url 'web_projects:project_list' %}" class="btn btn-secondary-custom">
+                    <i class="fas fa-arrow-right"></i> View All Web Apps
+                </a>
+            </div>
+        </div>
+
+        <!-- Mobile Apps -->
+        <div class="mb-5" data-aos="fade-up" data-aos-delay="200">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:50px;height:50px;border-radius:12px;background:rgba(155,89,255,0.12);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-mobile-alt" style="font-size:1.3rem;color:#b98bff;"></i>
+                </div>
+                <h3 class="fw-bold mb-0">Mobile <span style="color:#b98bff;">Apps</span></h3>
+            </div>
+            <div class="text-center mb-4">
+                <a href="{% url 'mobile_apps:app_list' %}" class="btn btn-outline-custom">
+                    <i class="fas fa-arrow-right"></i> View All Mobile Apps
+                </a>
+            </div>
+        </div>
+
+        <!-- Graphic Design -->
+        <div class="mb-5" data-aos="fade-up" data-aos-delay="300">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:50px;height:50px;border-radius:12px;background:rgba(255,107,107,0.12);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-palette" style="font-size:1.3rem;color:#ff8a8a;"></i>
+                </div>
+                <h3 class="fw-bold mb-0">Graphic <span style="color:#ff8a8a;">Design</span></h3>
+            </div>
+            <div class="text-center mb-4">
+                <a href="{% url 'graphic_design:design_list' %}" class="btn btn-outline-custom">
+                    <i class="fas fa-arrow-right"></i> View Graphic Design
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

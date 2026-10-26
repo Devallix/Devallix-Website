@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Terms of Service - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <span class="badge-custom mb-3"><i class="fas fa-file-contract me-1"></i> Legal</span>
+                <h1 class="section-title">Terms of <span class="accent">Service</span></h1>
+                <div class="divider divider-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="card-custom">
+                    <h4 class="fw-bold mb-3">Terms of Service</h4>
+                    <p style="color:var(--text-muted);">Welcome to our platform. By accessing or using our website and services, you agree to be bound by these Terms of Service.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Use of Applications</h5>
+                    <p style="color:var(--text-muted);">All desktop applications provided are free to download and use unless otherwise specified. You may not redistribute or sell our applications without permission.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Intellectual Property</h5>
+                    <p style="color:var(--text-muted);">All content, code, and applications on this website are the intellectual property of the developer unless otherwise noted.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Limitation of Liability</h5>
+                    <p style="color:var(--text-muted);">We are not liable for any damages that may arise from the use of our applications or website. Applications are provided "as is" without warranty.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Contact Us</h5>
+                    <p style="color:var(--text-muted);">For questions about these Terms, please contact us through our <a href="{% url 'contact:contact' %}">contact page</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

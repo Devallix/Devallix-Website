@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Testimonials - {{ block.super }}{% endblock %}
+{% block meta_description %}Read what clients and colleagues say about working with me.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <span class="badge-custom mb-3"><i class="fas fa-quote-left me-1"></i> Testimonials</span>
+                <h1 class="section-title">Client <span class="accent">Reviews</span></h1>
+                <div class="divider divider-center"></div>
+                <p class="section-subtitle">Hear from the people I've had the pleasure of working with.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            {% for testimonial in testimonials %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|divisibleby:3|yesno:'100,200,300' }}">
+                <div class="card-custom h-100 d-flex flex-column">
+                    <div class="d-flex gap-1 mb-3">
+                        {% for i in "12345" %}
+                        {% if forloop.counter <= testimonial.rating %}
+                        <i class="fas fa-star" style="color:var(--accent-primary);"></i>
+                        {% else %}
+                        <i class="far fa-star" style="color:var(--text-dim);"></i>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <p style="color:var(--text-muted);font-style:italic;flex-grow:1;margin-bottom:1.5rem;">
+                        "{{ testimonial.review }}"
+                    </p>
+
+                    <div class="d-flex align-items-center gap-3 pt-3" style="border-top:1px solid var(--border-color);">
+                        {% if testimonial.image %}
+                        <img src="{{ testimonial.image.url }}" alt="{{ testimonial.client_name }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
+                        {% else %}
+                        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span style="color:var(--bg-primary);font-weight:700;">{{ testimonial.client_name.0 }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="fw-bold mb-0" style="font-size:0.95rem;">{{ testimonial.client_name }}</h6>
+                            <small style="color:var(--text-dim);">
+                                {{ testimonial.position }}{% if testimonial.company %} at {{ testimonial.company }}{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state" data-aos="fade-up">
+                    <i class="fas fa-quote-left"></i>
+                    <h3>No Testimonials Yet</h3>
+                    <p>Client reviews will appear here once they become available.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="d-flex justify-content-center mt-5" data-aos="fade-up">
+            <nav class="pagination-custom">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

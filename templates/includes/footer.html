@@ -1,0 +1,101 @@
+<style>
+    .footer-links a { color: var(--text-muted); transition: color 0.2s ease; text-decoration: none; }
+    .footer-links a:hover { color: var(--accent-primary); }
+    .footer-contact div { transition: color 0.2s ease; }
+    .footer-contact div:hover { color: var(--accent-primary); }
+</style>
+<footer class="bg-secondary-custom" style="border-top:1px solid var(--border-color);">
+    <div class="container py-5">
+        <div class="row g-4 justify-content-center text-center">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+                    {% if site_settings.logo %}
+                    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" height="32">
+                    {% else %}
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;">
+                        <span style="color:var(--bg-primary);font-weight:800;">D</span>
+                    </div>
+                    {% endif %}
+                    <span style="font-weight:800;font-size:1.1rem;">{{ site_settings.site_name|default:'DevPortfolio' }}</span>
+                </div>
+                <p style="color:var(--text-muted);max-width:350px;margin:0 auto;">{{ site_settings.footer_text|default:'Professional software developer crafting premium desktop, web and mobile applications, plus bold graphic design.' }}</p>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    {% if site_settings.github_url %}
+                    <a href="{{ site_settings.github_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_settings.linkedin_url %}
+                    <a href="{{ site_settings.linkedin_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_settings.twitter_url %}
+                    <a href="{{ site_settings.twitter_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_settings.youtube_url %}
+                    <a href="{{ site_settings.youtube_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                    {% endif %}
+                    {% if not site_settings.github_url and not site_settings.linkedin_url and not site_settings.twitter_url %}
+                    <a href="#" class="icon-box icon-box-accent"><i class="fab fa-github"></i></a>
+                    <a href="#" class="icon-box icon-box-accent"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="icon-box icon-box-accent"><i class="fab fa-twitter"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-6 text-start">
+                <h6 class="fw-bold mb-4" style="color:var(--text-white);">Quick Links</h6>
+                <ul class="list-unstyled footer-links">
+                    <li class="mb-2"><a href="{% url 'core:home' %}">Home</a></li>
+                    <li class="mb-2"><a href="{% url 'core:about' %}">About</a></li>
+                    <li class="mb-2"><a href="{% url 'core:skills' %}">Skills</a></li>
+                    <li class="mb-2"><a href="{% url 'portfolio:portfolio' %}">Portfolio</a></li>
+                    <li class="mb-2"><a href="{% url 'contact:contact' %}">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-6 text-start">
+                <h6 class="fw-bold mb-4" style="color:var(--text-white);">Resources</h6>
+                <ul class="list-unstyled footer-links">
+                    <li class="mb-2"><a href="{% url 'desktop_apps:app_list' %}">Desktop Apps</a></li>
+                    <li class="mb-2"><a href="{% url 'web_projects:project_list' %}">Web Apps</a></li>
+                    <li class="mb-2"><a href="{% url 'mobile_apps:app_list' %}">Mobile Apps</a></li>
+                    <li class="mb-2"><a href="{% url 'graphic_design:design_list' %}">Graphic Design</a></li>
+                    <li class="mb-2"><a href="{% url 'blog:post_list' %}">Blog</a></li>
+                    <li class="mb-2"><a href="{% url 'testimonials:testimonial_list' %}">Testimonials</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4 col-md-6 text-start">
+                <h6 class="fw-bold mb-4" style="color:var(--text-white);">Contact</h6>
+                <div class="footer-contact">
+                    {% if site_settings.phone %}
+                    <div class="mb-3" style="color:var(--text-muted);">
+                        <i class="fas fa-phone me-2"></i>
+                        <span>{{ site_settings.phone }}</span>
+                    </div>
+                    {% endif %}
+                    {% if site_settings.email %}
+                    <div class="mb-3" style="color:var(--text-muted);">
+                        <i class="fas fa-envelope me-2"></i>
+                        <span>{{ site_settings.email }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border-color);margin-top:2rem;">
+            <div class="py-4 text-center">
+                <p style="color:var(--text-dim);font-size:0.85rem;margin:0;">
+                    &copy; {{ site_settings.site_name|default:'DevPortfolio' }} {% now "Y" %}. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,131 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">Contact Messages</h4>
+            <p style="color:var(--text-dim);margin:0;">Manage messages from your contact form.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="?status=unread" class="btn btn-sm {% if status_filter == 'unread' %}btn-accent{% else %}btn-outline-accent{% endif %}">Unread</a>
+            <a href="?status=read" class="btn btn-sm {% if status_filter == 'read' %}btn-accent{% else %}btn-outline-accent{% endif %}">Read</a>
+            <a href="?status=replied" class="btn btn-sm {% if status_filter == 'replied' %}btn-accent{% else %}btn-outline-accent{% endif %}">Replied</a>
+            <a href="?status=archived" class="btn btn-sm {% if status_filter == 'archived' %}btn-accent{% else %}btn-outline-accent{% endif %}">Archived</a>
+            <a href="{% url 'dashboard:message_list' %}" class="btn btn-sm btn-outline-accent">All</a>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th style="width:180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages_list %}
+                    <tr style="{% if message.status == 'unread' %}border-left:3px solid var(--accent);{% endif %}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,217,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-user" style="color:var(--accent-secondary);font-size:0.75rem;"></i>
+                                </div>
+                                <span style="font-weight:600;">{{ message.name }}</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--text-muted);">{{ message.email }}</td>
+                        <td style="color:var(--text-muted);max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ message.subject }}</td>
+                        <td>
+                            {% if message.status == 'unread' %}
+                            <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:0.75rem;">Unread</span>
+                            {% elif message.status == 'read' %}
+                            <span style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);padding:3px 8px;border-radius:6px;font-size:0.75rem;">Read</span>
+                            {% elif message.status == 'replied' %}
+                            <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Replied</span>
+                            {% else %}
+                            <span style="background:rgba(255,193,7,0.15);color:#ffc107;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Archived</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--text-dim);font-size:0.85rem;">{{ message.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'dashboard:message_detail' pk=message.pk %}" class="btn btn-outline-accent btn-sm" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="archive">
+                                    <button type="submit" class="btn btn-sm" style="background:rgba(255,193,7,0.15);color:#ffc107;border:1px solid rgba(255,193,7,0.3);" title="Archive">
+                                        <i class="fas fa-archive"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="submit" class="btn btn-sm" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);" title="Delete" onclick="return confirm('Delete this message?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="color:var(--text-dim);padding:3rem;">
+                            <i class="fas fa-envelope-open" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                            No messages found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if messages_list.has_other_pages %}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span style="color:var(--text-dim);font-size:0.85rem;">
+                Page {{ messages_list.number }} of {{ messages_list.paginator.num_pages }}
+            </span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if messages_list.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages_list.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in messages_list.paginator.page_range %}
+                    {% if messages_list.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background:var(--accent);border-color:var(--accent);color:var(--bg-primary);">{{ num }}</span>
+                    </li>
+                    {% elif num > messages_list.number|add:'-3' and num < messages_list.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--text-muted);">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if messages_list.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ messages_list.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

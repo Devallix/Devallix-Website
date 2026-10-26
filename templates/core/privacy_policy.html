@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Privacy Policy - {{ block.super }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <span class="badge-custom mb-3"><i class="fas fa-shield-alt me-1"></i> Legal</span>
+                <h1 class="section-title">Privacy <span class="accent">Policy</span></h1>
+                <div class="divider divider-center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                <div class="card-custom">
+                    <h4 class="fw-bold mb-3">Introduction</h4>
+                    <p style="color:var(--text-muted);">This Privacy Policy describes how we collect, use, and protect your personal information when you visit our website and use our services.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Information We Collect</h5>
+                    <p style="color:var(--text-muted);">We may collect personal information such as your name, email address, and other contact details when you voluntarily submit them through our contact form or newsletter subscription.</p>
+                    <h5 class="fw-bold mt-4 mb-2">How We Use Your Information</h5>
+                    <p style="color:var(--text-muted);">We use the information we collect to respond to your inquiries, send newsletter updates (if subscribed), and improve our website and services.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Data Protection</h5>
+                    <p style="color:var(--text-muted);">We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure.</p>
+                    <h5 class="fw-bold mt-4 mb-2">Contact Us</h5>
+                    <p style="color:var(--text-muted);">If you have any questions about this Privacy Policy, please contact us through our <a href="{% url 'contact:contact' %}">contact page</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

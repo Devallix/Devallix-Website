@@ -1,0 +1,219 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}Dashboard Home{% endblock %}
+{% block topbar_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">Welcome back, {{ request.user.get_short_name|default:request.user.username }}!</h4>
+            <p style="color:var(--text-dim);margin:0;">Here's an overview of your portfolio.</p>
+        </div>
+        <a href="{% url 'dashboard:app_create' %}" class="btn btn-accent">
+            <i class="fas fa-plus me-1"></i> New Desktop App
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-desktop" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_apps }}</div>
+                <div class="card-label">Desktop Apps</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-globe" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ total_projects }}</div>
+                <div class="card-label">Web Apps</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-download" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_app_downloads|intcomma }}</div>
+                <div class="card-label">Total Downloads</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-envelope" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ unread_messages }}</div>
+                <div class="card-label">Unread Messages</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-users" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_subscribers }}</div>
+                <div class="card-label">Newsletter Subscribers</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-blog" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ total_posts }}</div>
+                <div class="card-label">Blog Posts</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-quote-left" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_testimonials }}</div>
+                <div class="card-label">Testimonials</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-chart-line" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ total_downloads }}</div>
+                <div class="card-label">Download Records</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-mobile-alt" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_mobile_apps }}</div>
+                <div class="card-label">Mobile Apps</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-palette" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ total_designs }}</div>
+                <div class="card-label">Graphic Designs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Popular Apps -->
+        <div class="col-xl-8">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-trophy me-2" style="color:var(--accent);"></i>Most Downloaded Apps</h6>
+                    <a href="{% url 'dashboard:app_list' %}" style="color:var(--accent);font-size:0.85rem;">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dashboard mb-0">
+                        <thead>
+                            <tr>
+                                <th>Desktop App</th>
+                                <th>Downloads</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in app_download_stats %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if app.logo %}
+                                        <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
+                                        {% else %}
+                                        <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <i class="fas fa-cube" style="color:var(--bg-primary);font-size:0.8rem;"></i>
+                                        </div>
+                                        {% endif %}
+                                        <span>{{ app.name }}</span>
+                                    </div>
+                                </td>
+                                <td><span style="color:var(--accent);font-weight:600;">{{ app.download_count|intcomma }}</span></td>
+                                <td>
+                                    {% if app.published %}
+                                    <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Published</span>
+                                    {% else %}
+                                    <span style="background:rgba(255,193,7,0.15);color:#ffc107;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Draft</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center" style="color:var(--text-dim);padding:2rem;">No applications yet. <a href="{% url 'dashboard:app_create' %}">Create your first app</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Messages -->
+        <div class="col-xl-4">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-envelope me-2" style="color:var(--accent-secondary);"></i>Recent Messages</h6>
+                    <a href="{% url 'dashboard:message_list' %}" style="color:var(--accent);font-size:0.85rem;">View All</a>
+                </div>
+                {% for msg in recent_messages %}
+                <div class="d-flex gap-3 mb-3 pb-3" {% if not forloop.last %}style="border-bottom:1px solid var(--border-color);"{% endif %}>
+                    <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,217,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-user" style="color:var(--accent-secondary);font-size:0.9rem;"></i>
+                    </div>
+                    <div style="min-width:0;">
+                        <div class="d-flex justify-content-between">
+                            <span style="font-weight:600;font-size:0.9rem;">{{ msg.name }}</span>
+                            {% if msg.status == 'unread' %}
+                            <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px;"></span>
+                            {% endif %}
+                        </div>
+                        <p style="color:var(--text-dim);font-size:0.8rem;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;">{{ msg.subject }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center" style="color:var(--text-dim);padding:2rem;">
+                    <i class="fas fa-envelope-open" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                    No messages yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2" style="color:var(--accent);"></i>Quick Actions</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'dashboard:app_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Desktop App</a>
+                    <a href="{% url 'dashboard:project_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Web App</a>
+                    <a href="{% url 'dashboard:mobile_app_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Mobile App</a>
+                    <a href="{% url 'dashboard:design_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Design</a>
+                    <a href="{% url 'dashboard:blog_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Blog Post</a>
+                    <a href="{% url 'dashboard:skill_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Skill</a>
+                    <a href="{% url 'dashboard:testimonial_create' %}" class="btn btn-accent btn-sm"><i class="fas fa-plus me-1"></i> New Testimonial</a>
+                    <a href="{% url 'dashboard:subscriber_export' %}" class="btn btn-outline-accent btn-sm"><i class="fas fa-download me-1"></i> Export Subscribers</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

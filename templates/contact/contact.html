@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact - {{ block.super }}{% endblock %}
+{% block meta_description %}Get in touch with us. Send a message, ask a question, or discuss your next project.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center" data-aos="fade-up">
+                <span class="badge-custom mb-3"><i class="fas fa-envelope me-1"></i> Contact</span>
+                <h1 class="section-title">Get In <span class="accent">Touch</span></h1>
+                <div class="divider divider-center"></div>
+                <p class="section-subtitle">Have a question, suggestion, or want to work together? I'd love to hear from you.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7" data-aos="fade-right">
+                <div class="card-custom">
+                    <h4 class="fw-bold mb-2">Send a <span class="accent">Message</span></h4>
+                    <p style="color:var(--text-muted);margin-bottom:2rem;font-size:0.9rem;">Fill out the form below and I'll get back to you as soon as possible.</p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label for="id_name" class="form-label" style="color:var(--text-muted);font-size:0.85rem;">Your Name <span style="color:var(--accent-primary);">*</span></label>
+                                <input type="text" name="name" id="id_name" class="form-control form-control-custom" placeholder="John Doe" value="{{ form.name.value|default:'' }}" required>
+                                {% if form.name.errors %}
+                                <div class="mt-1" style="color:#ff6b6b;font-size:0.8rem;">{{ form.name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email" class="form-label" style="color:var(--text-muted);font-size:0.85rem;">Your Email <span style="color:var(--accent-primary);">*</span></label>
+                                <input type="email" name="email" id="id_email" class="form-control form-control-custom" placeholder="john@example.com" value="{{ form.email.value|default:'' }}" required>
+                                {% if form.email.errors %}
+                                <div class="mt-1" style="color:#ff6b6b;font-size:0.8rem;">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_subject" class="form-label" style="color:var(--text-muted);font-size:0.85rem;">Subject <span style="color:var(--accent-primary);">*</span></label>
+                                <input type="text" name="subject" id="id_subject" class="form-control form-control-custom" placeholder="Project Inquiry" value="{{ form.subject.value|default:'' }}" required>
+                                {% if form.subject.errors %}
+                                <div class="mt-1" style="color:#ff6b6b;font-size:0.8rem;">{{ form.subject.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="id_message" class="form-label" style="color:var(--text-muted);font-size:0.85rem;">Message <span style="color:var(--accent-primary);">*</span></label>
+                                <textarea name="message" id="id_message" class="form-control form-control-custom" rows="6" placeholder="Tell me about your project, question, or idea..." required>{{ form.message.value|default:'' }}</textarea>
+                                {% if form.message.errors %}
+                                <div class="mt-1" style="color:#ff6b6b;font-size:0.8rem;">{{ form.message.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary-custom btn-lg">
+                                    <i class="fas fa-paper-plane"></i> Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5" data-aos="fade-left">
+                <div class="card-custom h-100">
+                    <h4 class="fw-bold mb-2">Contact <span class="accent">Info</span></h4>
+                    <p style="color:var(--text-muted);margin-bottom:2rem;font-size:0.9rem;">Here are the ways you can reach out to me directly.</p>
+
+                    <div class="d-flex align-items-start gap-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="icon-box icon-box-accent flex-shrink-0">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Email</h6>
+                            {% if site_settings.email %}
+                            <a href="mailto:{{ site_settings.email }}" style="color:var(--text-muted);font-size:0.9rem;">{{ site_settings.email }}</a>
+                            {% else %}
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Not configured</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                        <div class="icon-box icon-box-accent flex-shrink-0">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Phone</h6>
+                            {% if site_settings.phone %}
+                            <a href="tel:{{ site_settings.phone }}" style="color:var(--text-muted);font-size:0.9rem;">{{ site_settings.phone }}</a>
+                            {% else %}
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Not configured</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="icon-box icon-box-accent flex-shrink-0">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Location</h6>
+                            {% if site_settings.address %}
+                            <span style="color:var(--text-muted);font-size:0.9rem;">{{ site_settings.address }}</span>
+                            {% else %}
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Not configured</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr style="border-color:var(--border-color);margin:2rem 0;">
+
+                    <h6 class="fw-bold mb-3" style="color:var(--text-white);">Follow Me</h6>
+                    <div class="d-flex flex-wrap gap-2" data-aos="fade-up" data-aos-delay="400">
+                        {% if site_settings.github_url %}
+                        <a href="{{ site_settings.github_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.linkedin_url %}
+                        <a href="{{ site_settings.linkedin_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.twitter_url %}
+                        <a href="{{ site_settings.twitter_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.youtube_url %}
+                        <a href="{{ site_settings.youtube_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.facebook_url %}
+                        <a href="{{ site_settings.facebook_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        {% endif %}
+                        {% if site_settings.instagram_url %}
+                        <a href="{{ site_settings.instagram_url }}" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        {% endif %}
+                        {% if not site_settings.github_url and not site_settings.linkedin_url and not site_settings.twitter_url and not site_settings.youtube_url and not site_settings.facebook_url and not site_settings.instagram_url %}
+                        <a href="#" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="icon-box icon-box-accent" target="_blank" rel="noopener" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

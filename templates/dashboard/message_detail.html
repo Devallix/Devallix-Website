@@ -1,0 +1,120 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}Message: {{ message.subject }}{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">Message Details</h4>
+            <p style="color:var(--text-dim);margin:0;">
+                <a href="{% url 'dashboard:message_list' %}" style="color:var(--accent);">Messages</a>
+                <span style="color:var(--text-dim);margin:0 0.5rem;">/</span>
+                {{ message.subject }}
+            </p>
+        </div>
+        <a href="{% url 'dashboard:message_list' %}" class="btn btn-outline-accent">
+            <i class="fas fa-arrow-left me-1"></i> Back to Messages
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="dashboard-card mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">{{ message.subject }}</h5>
+                        <div style="color:var(--text-dim);font-size:0.85rem;">
+                            From: <strong style="color:var(--text-white);">{{ message.name }}</strong> &lt;{{ message.email }}&gt;
+                        </div>
+                        <div style="color:var(--text-dim);font-size:0.8rem;margin-top:4px;">
+                            {{ message.created_at|date:"F d, Y \a\t H:i" }}
+                        </div>
+                    </div>
+                    <div>
+                        {% if message.status == 'unread' %}
+                        <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:4px 10px;border-radius:8px;font-size:0.8rem;font-weight:600;">Unread</span>
+                        {% elif message.status == 'read' %}
+                        <span style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);padding:4px 10px;border-radius:8px;font-size:0.8rem;font-weight:600;">Read</span>
+                        {% elif message.status == 'replied' %}
+                        <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:4px 10px;border-radius:8px;font-size:0.8rem;font-weight:600;">Replied</span>
+                        {% else %}
+                        <span style="background:rgba(255,193,7,0.15);color:#ffc107;padding:4px 10px;border-radius:8px;font-size:0.8rem;font-weight:600;">Archived</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-primary);border-radius:12px;padding:1.5rem;margin-top:1rem;">
+                    <div style="color:var(--text-muted);line-height:1.8;white-space:pre-wrap;">{{ message.message }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-bolt me-1"></i> Actions</h6>
+                <div class="d-grid gap-2">
+                    {% if message.status != 'read' %}
+                    <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="read">
+                        <button type="submit" class="btn btn-outline-accent w-100">
+                            <i class="fas fa-envelope-open me-1"></i> Mark as Read
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if message.status != 'replied' %}
+                    <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="replied">
+                        <button type="submit" class="btn btn-accent w-100">
+                            <i class="fas fa-reply me-1"></i> Mark as Replied
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if message.status != 'archived' %}
+                    <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="archive">
+                        <button type="submit" class="btn btn-outline-accent w-100">
+                            <i class="fas fa-archive me-1"></i> Archive
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'dashboard:message_action' pk=message.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn w-100" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);" onclick="return confirm('Delete this message?');">
+                            <i class="fas fa-trash me-1"></i> Delete Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-user me-1"></i> Sender Info</h6>
+                <div class="mb-2">
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Name</div>
+                    <div style="font-weight:600;">{{ message.name }}</div>
+                </div>
+                <div class="mb-2">
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Email</div>
+                    <div style="font-weight:500;"><a href="mailto:{{ message.email }}" style="color:var(--accent);">{{ message.email }}</a></div>
+                </div>
+                {% if message.ip_address %}
+                <div class="mb-2">
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">IP Address</div>
+                    <div style="color:var(--text-muted);font-size:0.9rem;">{{ message.ip_address }}</div>
+                </div>
+                {% endif %}
+                <div>
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Received</div>
+                    <div style="color:var(--text-muted);font-size:0.9rem;">{{ message.created_at|date:"M d, Y H:i:s" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

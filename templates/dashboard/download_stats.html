@@ -1,0 +1,156 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}Download Statistics{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">Download Statistics</h4>
+            <p style="color:var(--text-dim);margin:0;">Track your application downloads.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-download" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_downloads|intcomma }}</div>
+                <div class="card-label">Total Downloads</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-desktop" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ total_apps }}</div>
+                <div class="card-label">Total Applications</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(40,167,69,0.1);">
+                    <i class="fas fa-calendar-day" style="color:#28a745;"></i>
+                </div>
+                <div class="card-value">{{ today_downloads|intcomma }}</div>
+                <div class="card-label">Downloads Today</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(255,193,7,0.1);">
+                    <i class="fas fa-calendar-week" style="color:#ffc107;"></i>
+                </div>
+                <div class="card-value">{{ week_downloads|intcomma }}</div>
+                <div class="card-label">This Week</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-calendar-alt" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ month_downloads|intcomma }}</div>
+                <div class="card-label">This Month</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-trophy" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ most_downloaded.name|default:"N/A" }}</div>
+                <div class="card-label">Most Downloaded</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--accent);"></i>Downloads by Application</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dashboard mb-0">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>Platform</th>
+                                <th>Downloads</th>
+                                <th>% of Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in app_download_stats %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if app.logo %}
+                                        <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
+                                        {% else %}
+                                        <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                            <i class="fas fa-cube" style="color:var(--bg-primary);font-size:0.8rem;"></i>
+                                        </div>
+                                        {% endif %}
+                                        <a href="{% url 'dashboard:app_detail' pk=app.pk %}" style="font-weight:600;color:var(--text-white);">{{ app.name }}</a>
+                                    </div>
+                                </td>
+                                <td><span style="color:var(--accent-secondary);font-weight:500;">{{ app.get_platform_display }}</span></td>
+                                <td><span style="color:var(--accent);font-weight:600;">{{ app.download_count|intcomma }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="flex:1;max-width:100px;height:6px;background:var(--bg-primary);border-radius:3px;overflow:hidden;">
+                                            <div style="width:{% if total_downloads %}{{ app.download_count|floatformat:0 }}%{% else %}0%{% endif %};height:100%;background:var(--accent);border-radius:3px;"></div>
+                                        </div>
+                                        <span style="color:var(--text-dim);font-size:0.8rem;">
+                                            {% if total_downloads %}{{ app.download_count|floatformat:1 }}%{% else %}0%{% endif %}
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center" style="color:var(--text-dim);padding:2rem;">No download data available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-clock me-2" style="color:var(--accent-secondary);"></i>Recent Downloads</h6>
+                </div>
+                {% for download in recent_downloads %}
+                <div class="d-flex justify-content-between align-items-center py-2" {% if not forloop.last %}style="border-bottom:1px solid var(--border-color);"{% endif %}>
+                    <div class="d-flex align-items-center gap-2" style="min-width:0;">
+                        <div style="width:28px;height:28px;border-radius:6px;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-download" style="color:var(--accent);font-size:0.7rem;"></i>
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-weight:500;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ download.application.name }}</div>
+                            <div style="color:var(--text-dim);font-size:0.75rem;">{{ download.downloaded_at|timesince }} ago</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center" style="color:var(--text-dim);padding:2rem;">
+                    <i class="fas fa-download" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                    No downloads recorded yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

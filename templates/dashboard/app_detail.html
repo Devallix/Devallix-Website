@@ -1,0 +1,221 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}{{ application.name }}{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">{{ application.name }}</h4>
+            <p style="color:var(--text-dim);margin:0;">
+                <a href="{% url 'dashboard:app_list' %}" style="color:var(--accent);">Desktop Apps</a>
+                <span style="color:var(--text-dim);margin:0 0.5rem;">/</span>
+                {{ application.name }}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dashboard:app_edit' pk=application.pk %}" class="btn btn-accent">
+                <i class="fas fa-edit me-1"></i> Edit
+            </a>
+            <a href="{% url 'dashboard:app_delete' pk=application.pk %}" class="btn" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);">
+                <i class="fas fa-trash me-1"></i> Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-info-circle me-1"></i> Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Platform</div>
+                        <div style="font-weight:600;">{{ application.get_platform_display }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">License</div>
+                        <div style="font-weight:600;">{{ application.get_license_type_display }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Version</div>
+                        <div style="font-weight:600;">{{ application.version }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Downloads</div>
+                        <div style="font-weight:600;color:var(--accent);">{{ application.download_count|intcomma }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">File Size</div>
+                        <div style="font-weight:600;">{{ application.file_size|default:"—" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Release Date</div>
+                        <div style="font-weight:600;">{{ application.release_date|date:"M d, Y"|default:"—" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Category</div>
+                        <div style="font-weight:600;">{{ application.category|default:"—" }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Status</div>
+                        <div>
+                            {% if application.published %}
+                            <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Published</span>
+                            {% else %}
+                            <span style="background:rgba(255,193,7,0.15);color:#ffc107;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Draft</span>
+                            {% endif %}
+                            {% if application.featured %}
+                            <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:0.75rem;margin-left:4px;">Featured</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-align-left me-1"></i> Description</h6>
+                <p style="color:var(--text-muted);line-height:1.7;">{{ application.description|linebreaksbr }}</p>
+            </div>
+
+            {% if application.short_description %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-tag me-1"></i> Short Description</h6>
+                <p style="color:var(--text-muted);">{{ application.short_description }}</p>
+            </div>
+            {% endif %}
+
+            {% if application.minimum_requirements %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-1"></i> System Requirements</h6>
+                <p style="color:var(--text-muted);line-height:1.7;">{{ application.minimum_requirements|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            {% if application.installation_instructions %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-download me-1"></i> Installation Instructions</h6>
+                <p style="color:var(--text-muted);line-height:1.7;">{{ application.installation_instructions|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            {% if application.website_url or application.github_url %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-link me-1"></i> Links</h6>
+                <div class="d-flex gap-2">
+                    {% if application.website_url %}
+                    <a href="{{ application.website_url }}" target="_blank" class="btn btn-outline-accent btn-sm">
+                        <i class="fas fa-globe me-1"></i> Website
+                    </a>
+                    {% endif %}
+                    {% if application.github_url %}
+                    <a href="{{ application.github_url }}" target="_blank" class="btn btn-outline-accent btn-sm">
+                        <i class="fab fa-github me-1"></i> GitHub
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if application.meta_title or application.meta_description %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-search me-1"></i> SEO</h6>
+                {% if application.meta_title %}
+                <div class="mb-2">
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Meta Title</div>
+                    <div style="color:var(--text-muted);">{{ application.meta_title }}</div>
+                </div>
+                {% endif %}
+                {% if application.meta_description %}
+                <div>
+                    <div style="color:var(--text-dim);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Meta Description</div>
+                    <div style="color:var(--text-muted);">{{ application.meta_description }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            {% if application.banner %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-image me-1"></i> Banner</h6>
+                <img src="{{ application.banner.url }}" alt="{{ application.name }}" style="width:100%;border-radius:10px;object-fit:cover;">
+            </div>
+            {% endif %}
+
+            {% if application.logo %}
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-icons me-1"></i> Logo</h6>
+                <img src="{{ application.logo.url }}" alt="{{ application.name }}" style="width:100%;max-width:200px;border-radius:10px;object-fit:cover;">
+            </div>
+            {% endif %}
+
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-clock me-1"></i> Timestamps</h6>
+                <div class="mb-2">
+                    <div style="color:var(--text-dim);font-size:0.8rem;">Created</div>
+                    <div style="font-weight:500;font-size:0.9rem;">{{ application.created_at|date:"M d, Y H:i" }}</div>
+                </div>
+                <div>
+                    <div style="color:var(--text-dim);font-size:0.8rem;">Updated</div>
+                    <div style="font-weight:500;font-size:0.9rem;">{{ application.updated_at|date:"M d, Y H:i" }}</div>
+                </div>
+            </div>
+
+            <div class="dashboard-card mb-4">
+                <h6 class="fw-bold mb-3" style="color:var(--accent-secondary);"><i class="fas fa-layer-group me-1"></i> Versions</h6>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span style="color:var(--text-dim);font-size:0.85rem;">{{ versions|length }} version{{ versions|length|pluralize }}</span>
+                    <a href="{% url 'dashboard:version_create' app_pk=application.pk %}" class="btn btn-accent btn-sm">
+                        <i class="fas fa-plus me-1"></i> Add Version
+                    </a>
+                </div>
+                {% for version in versions %}
+                <div class="d-flex justify-content-between align-items-center py-2" {% if not forloop.last %}style="border-bottom:1px solid var(--border-color);"{% endif %}>
+                    <div>
+                        <div style="font-weight:600;font-size:0.9rem;">v{{ version.version_number }}</div>
+                        <div style="color:var(--text-dim);font-size:0.8rem;">{{ version.release_date|date:"M d, Y" }}</div>
+                    </div>
+                    <div>
+                        {% if version.is_current %}
+                        <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:2px 6px;border-radius:6px;font-size:0.7rem;">Current</span>
+                        {% endif %}
+                        <span style="color:var(--text-dim);font-size:0.8rem;margin-left:4px;">{{ version.file_size|default:"" }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color:var(--text-dim);font-size:0.85rem;margin:0;">No versions yet.</p>
+                {% endfor %}
+            </div>
+
+            <div class="dashboard-card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0" style="color:var(--accent);"><i class="fas fa-camera me-1"></i> Screenshots</h6>
+                    <a href="{% url 'dashboard:screenshot_upload' pk=application.pk %}" class="btn btn-accent btn-sm">
+                        <i class="fas fa-upload me-1"></i> Upload
+                    </a>
+                </div>
+                <div class="row g-2">
+                    {% for screenshot in screenshots %}
+                    <div class="col-6">
+                        <div style="position:relative;border-radius:10px;overflow:hidden;">
+                            <img src="{{ screenshot.image.url }}" alt="{{ screenshot.caption }}" style="width:100%;height:100px;object-fit:cover;">
+                            <form method="post" action="{% url 'dashboard:screenshot_delete' pk=screenshot.pk %}" style="position:absolute;top:4px;right:4px;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm" style="background:rgba(220,53,69,0.8);color:#fff;padding:2px 6px;font-size:0.7rem;" title="Delete" onclick="return confirm('Delete this screenshot?');">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center" style="color:var(--text-dim);font-size:0.85rem;padding:1rem;">
+                        No screenshots uploaded.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

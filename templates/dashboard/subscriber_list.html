@@ -1,0 +1,138 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}Newsletter Subscribers{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="page-title">Newsletter Subscribers</h4>
+            <p style="color:var(--text-dim);margin:0;">Manage your newsletter audience.</p>
+        </div>
+        <a href="{% url 'dashboard:subscriber_export' %}" class="btn btn-accent">
+            <i class="fas fa-download me-1"></i> Export CSV
+        </a>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
+                    <i class="fas fa-users" style="color:var(--accent);"></i>
+                </div>
+                <div class="card-value">{{ total_subscribers|intcomma }}</div>
+                <div class="card-label">Total Subscribers</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(40,167,69,0.1);">
+                    <i class="fas fa-check-circle" style="color:#28a745;"></i>
+                </div>
+                <div class="card-value">{{ active_subscribers|intcomma }}</div>
+                <div class="card-label">Active</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(255,193,7,0.1);">
+                    <i class="fas fa-user-slash" style="color:#ffc107;"></i>
+                </div>
+                <div class="card-value">{{ inactive_subscribers|intcomma }}</div>
+                <div class="card-label">Inactive</div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card">
+                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
+                    <i class="fas fa-calendar-plus" style="color:var(--accent-secondary);"></i>
+                </div>
+                <div class="card-value">{{ recent_subscribers|intcomma }}</div>
+                <div class="card-label">This Month</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Active</th>
+                        <th>Date Subscribed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subscriber in subscribers %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,217,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-envelope" style="color:var(--accent-secondary);font-size:0.75rem;"></i>
+                                </div>
+                                <a href="mailto:{{ subscriber.email }}" style="color:var(--accent);font-weight:500;">{{ subscriber.email }}</a>
+                            </div>
+                        </td>
+                        <td style="color:var(--text-muted);">{{ subscriber.name|default:"—" }}</td>
+                        <td>
+                            {% if subscriber.is_active %}
+                            <span style="background:rgba(40,167,69,0.15);color:#28a745;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Active</span>
+                            {% else %}
+                            <span style="background:rgba(220,53,69,0.15);color:#dc3545;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td style="color:var(--text-dim);font-size:0.85rem;">{{ subscriber.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="color:var(--text-dim);padding:3rem;">
+                            <i class="fas fa-users" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+                            No subscribers yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if subscribers.has_other_pages %}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span style="color:var(--text-dim);font-size:0.85rem;">
+                Page {{ subscribers.number }} of {{ subscribers.paginator.num_pages }}
+            </span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if subscribers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ subscribers.previous_page_number }}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in subscribers.paginator.page_range %}
+                    {% if subscribers.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background:var(--accent);border-color:var(--accent);color:var(--bg-primary);">{{ num }}</span>
+                    </li>
+                    {% elif num > subscribers.number|add:'-3' and num < subscribers.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--text-muted);">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if subscribers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ subscribers.next_page_number }}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

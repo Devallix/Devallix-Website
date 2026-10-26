@@ -1,0 +1,79 @@
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'core:home' %}">
+            {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" height="36">
+            {% else %}
+            <div class="brand-logo-box">
+                <span>D</span>
+            </div>
+            {% endif %}
+            <span class="brand-text">{{ site_settings.site_name|default:'DevPortfolio' }}</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto align-items-lg-center nav-pills-wrapper">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:about' %}">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.url_name == 'portfolio' %}active{% endif %}" href="{% url 'portfolio:portfolio' %}">Portfolio</a>
+                </li>
+                <li class="nav-item dropdown nav-apps-dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'desktop_apps' or request.resolver_match.app_name == 'web_projects' or request.resolver_match.app_name == 'mobile_apps' %}active{% endif %}" href="#" id="appsDropdown" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                        Apps <i class="fas fa-chevron-down nav-chevron"></i>
+                    </a>
+                    <ul class="dropdown-menu nav-dropdown apps-menu" aria-labelledby="appsDropdown">
+                        <li class="apps-menu-header">Explore My Apps</li>
+                        <li>
+                            <a class="dropdown-item apps-menu-item" href="{% url 'desktop_apps:app_list' %}">
+                                <span class="apps-menu-icon"><i class="fas fa-desktop"></i></span>
+                                <span class="apps-menu-text">
+                                    <strong>Desktop Apps</strong>
+                                    <small>Windows, macOS &amp; Linux</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item apps-menu-item" href="{% url 'web_projects:project_list' %}">
+                                <span class="apps-menu-icon apps-menu-icon-cyan"><i class="fas fa-globe"></i></span>
+                                <span class="apps-menu-text">
+                                    <strong>Web Apps</strong>
+                                    <small>Websites &amp; web applications</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item apps-menu-item" href="{% url 'mobile_apps:app_list' %}">
+                                <span class="apps-menu-icon apps-menu-icon-purple"><i class="fas fa-mobile-alt"></i></span>
+                                <span class="apps-menu-text">
+                                    <strong>Mobile Apps</strong>
+                                    <small>Android &amp; iOS applications</small>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.app_name == 'graphic_design' %}active{% endif %}" href="{% url 'graphic_design:design_list' %}">Graphic Design</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-3 nav-actions">
+                <a href="{% url 'contact:contact' %}" class="nav-cta-btn">
+                    <span class="nav-cta-icon"><i class="fas fa-paper-plane"></i></span>
+                    Hire Me
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>

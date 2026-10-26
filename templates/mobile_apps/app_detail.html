@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ app.name }} - Mobile Apps - {{ block.super }}{% endblock %}
+{% block meta_description %}{{ app.meta_description|default:app.short_description }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="padding-bottom:40px;">
+    <div class="container">
+        <div class="row align-items-center g-4" data-aos="fade-up">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb" style="background:none;padding:0;margin:0;">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}" style="color:var(--text-dim);">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'mobile_apps:app_list' %}" style="color:var(--text-dim);">Mobile Apps</a></li>
+                        <li class="breadcrumb-item active" style="color:var(--accent-primary);">{{ app.name }}</li>
+                    </ol>
+                </nav>
+                <div class="d-flex align-items-center gap-4">
+                    {% if app.logo %}
+                    <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:80px;height:80px;border-radius:20px;object-fit:cover;flex-shrink:0;">
+                    {% else %}
+                    <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="fas fa-mobile-alt" style="color:var(--bg-primary);font-size:2rem;"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="fw-bold mb-1" style="font-size:2rem;">{{ app.name }}</h1>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <span class="badge-custom">v{{ app.version }}</span>
+                            <span class="badge-custom" style="background:rgba(0,217,255,0.15);color:var(--accent-secondary);border-color:rgba(0,217,255,0.3);">{{ app.get_platform_display }}</span>
+                            {% if app.featured %}
+                            <span class="badge-custom" style="background:rgba(182,255,0,0.15);color:var(--accent-primary);border-color:rgba(182,255,0,0.3);"><i class="fas fa-star me-1"></i> Featured</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex gap-3 justify-content-lg-end flex-wrap">
+                    {% if app.play_store_url %}
+                    <a href="{{ app.play_store_url }}" target="_blank" class="btn btn-primary-custom btn-lg">
+                        <i class="fab fa-google-play"></i> Google Play
+                    </a>
+                    {% endif %}
+                    {% if app.app_store_url %}
+                    <a href="{{ app.app_store_url }}" target="_blank" class="btn btn-outline-custom btn-lg">
+                        <i class="fab fa-apple"></i> App Store
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-padding" style="padding-top:40px;">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                {% if app.image %}
+                <div class="mb-4" data-aos="fade-up">
+                    <img src="{{ app.image.url }}" alt="{{ app.name }}" style="width:250px;height:250px;max-width:100%;border-radius:var(--radius-lg);object-fit:contain;">
+                </div>
+                {% endif %}
+
+                <div class="mb-5" data-aos="fade-up">
+                    <h4 class="fw-bold mb-3"><i class="fas fa-info-circle me-2" style="color:var(--accent-primary);"></i>About This App</h4>
+                    <div style="color:var(--text-muted);line-height:1.8;">{{ app.description|linebreaksbr }}</div>
+                </div>
+
+                {% if app.technologies.all %}
+                <div class="mb-5" data-aos="fade-up">
+                    <h4 class="fw-bold mb-3"><i class="fas fa-layer-group me-2" style="color:var(--accent-primary);"></i>Technologies Used</h4>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tech in app.technologies.all %}
+                        <span class="badge-custom" style="font-size:0.85rem;padding:8px 18px;">{{ tech.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card-custom mb-4" data-aos="fade-left">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-info me-2" style="color:var(--accent-primary);"></i>Quick Info</h5>
+                    <div style="border-top:1px solid var(--border-color);padding-top:1rem;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Platform</span>
+                            <span style="color:var(--text-white);font-size:0.9rem;">{{ app.get_platform_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Version</span>
+                            <span style="color:var(--text-white);font-size:0.9rem;">{{ app.version }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Status</span>
+                            <span style="color:var(--text-white);font-size:0.9rem;">{{ app.get_status_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span style="color:var(--text-dim);font-size:0.9rem;">Updated</span>
+                            <span style="color:var(--text-white);font-size:0.9rem;">{{ app.updated_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column gap-2 mt-4">
+                        {% if app.play_store_url %}
+                        <a href="{{ app.play_store_url }}" target="_blank" class="btn btn-primary-custom w-100 justify-content-center">
+                            <i class="fab fa-google-play"></i> Get it on Google Play
+                        </a>
+                        {% endif %}
+                        {% if app.app_store_url %}
+                        <a href="{{ app.app_store_url }}" target="_blank" class="btn btn-outline-custom w-100 justify-content-center">
+                            <i class="fab fa-apple"></i> Download on the App Store
+                        </a>
+                        {% endif %}
+                        {% if app.website_url %}
+                        <a href="{{ app.website_url }}" target="_blank" class="btn btn-outline-custom w-100 justify-content-center">
+                            <i class="fas fa-external-link-alt"></i> Visit Website
+                        </a>
+                        {% endif %}
+                        {% if app.github_url %}
+                        <a href="{{ app.github_url }}" target="_blank" class="btn btn-outline-custom w-100 justify-content-center">
+                            <i class="fab fa-github"></i> View Source Code
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-custom" data-aos="fade-left" data-aos-delay="200">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-link me-2" style="color:var(--accent-primary);"></i>Share</h5>
+                    <div class="d-flex gap-2">
+                        <a href="https://twitter.com/intent/tweet?text={{ app.name }}&url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-sm" style="padding:8px 14px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ app.name }}" target="_blank" class="btn btn-sm" style="padding:8px 14px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-sm" style="padding:8px 14px;background:rgba(0,217,255,0.15);color:var(--accent-secondary);border:1px solid rgba(0,217,255,0.3);border-radius:var(--radius-sm);">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if related_apps %}
+        <div class="mt-5 pt-5" style="border-top:1px solid var(--border-color);">
+            <h4 class="fw-bold mb-4" data-aos="fade-up"><i class="fas fa-mobile-alt me-2" style="color:var(--accent-primary);"></i>More Mobile Apps</h4>
+            <div class="row g-4">
+                {% for related in related_apps %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up">
+                    <div class="card-custom h-100 hover-lift" style="padding:0;overflow:hidden;">
+                        {% if related.image %}
+                        <div style="height:160px;overflow:hidden;">
+                            <img src="{{ related.image.url }}" alt="{{ related.name }}" style="width:100%;height:100%;object-fit:cover;">
+                        </div>
+                        {% else %}
+                        <div style="height:160px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-mobile-alt" style="font-size:2rem;color:var(--text-dim);"></i>
+                        </div>
+                        {% endif %}
+                        <div class="p-3">
+                            <h6 class="fw-bold mb-1">{{ related.name }}</h6>
+                            <p style="color:var(--text-muted);font-size:0.85rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ related.short_description }}</p>
+                            <a href="{{ related.get_absolute_url }}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;">
+                                <i class="fas fa-arrow-right"></i> View App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
