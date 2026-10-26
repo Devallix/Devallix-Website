@@ -59,8 +59,14 @@ class DesktopApplication(models.Model):
     installation_instructions = models.TextField(blank=True)
     logo = models.ImageField(upload_to='uploads/app_icons/', blank=True, null=True)
     banner = models.ImageField(upload_to='uploads/app_banners/', blank=True, null=True)
-    installer_file = models.FileField(upload_to='uploads/installers/', blank=True, null=True)
-    zip_file = models.FileField(upload_to='uploads/installers/', blank=True, null=True)
+    installer_url = models.URLField(
+        'installer file URL', max_length=500, blank=True,
+        help_text='Direct URL to the installer file (GitHub Releases, S3, Dropbox, etc.).',
+    )
+    zip_url = models.URLField(
+        'ZIP file URL', max_length=500, blank=True,
+        help_text='Optional direct URL to a ZIP archive of the app.',
+    )
     website_url = models.URLField(blank=True)
     github_url = models.URLField(blank=True)
     featured = models.BooleanField(default=False)
@@ -100,8 +106,14 @@ class ApplicationVersion(models.Model):
     release_date = models.DateField()
     changes = models.TextField()
     release_notes = models.TextField(blank=True)
-    installer_file = models.FileField(upload_to='uploads/installers/versions/', blank=True, null=True)
-    zip_file = models.FileField(upload_to='uploads/installers/versions/', blank=True, null=True)
+    installer_url = models.URLField(
+        'installer file URL', max_length=500, blank=True,
+        help_text='Direct URL to the installer file (GitHub Releases, S3, Dropbox, etc.).',
+    )
+    zip_url = models.URLField(
+        'ZIP file URL', max_length=500, blank=True,
+        help_text='Optional direct URL to a ZIP archive of the app.',
+    )
     file_size = models.CharField(max_length=50, blank=True)
     is_current = models.BooleanField(default=False)
 

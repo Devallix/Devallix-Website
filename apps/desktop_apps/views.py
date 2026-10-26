@@ -1,6 +1,5 @@
 from django.views.generic import ListView, DetailView
 from django.shortcuts import get_object_or_404, redirect
-from django.http import FileResponse
 from .models import DesktopApplication, ApplicationCategory, ApplicationVersion
 
 
@@ -62,8 +61,11 @@ class AppDetailView(DetailView):
 def download_app(request, slug):
     app = get_object_or_404(DesktopApplication, slug=slug, published=True)
 
-    if app.installer_file:
+    target_url = app.installer_url or app.zip_url
+
+    if target_url:
         from apps.downloads.models import Download
+
         ip = request.META.get('REMOTE_ADDR')
         ua = request.META.get('HTTP_USER_AGENT', '')
         Download.objects.create(
@@ -73,7 +75,7 @@ def download_app(request, slug):
             user=request.user if request.user.is_authenticated else None,
         )
         app.increment_download()
-        return FileResponse(app.installer_file.open('rb'), as_attachment=True, filename=app.installer_file.name.split('/')[-1])
+        return redirect(target_url)
 
     return redirect('desktop_apps:app_detail', slug=slug)
 

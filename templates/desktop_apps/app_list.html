@@ -101,7 +101,7 @@
                             <a href="{{ app.get_absolute_url }}" class="btn btn-sm btn-outline-custom" style="padding:6px 14px;">
                                 <i class="fas fa-info-circle"></i> Details
                             </a>
-                            {% if app.installer_file %}
+                            {% if app.installer_url or app.zip_url %}
                             <a href="{% url 'desktop_apps:download_app' app.slug %}" class="btn btn-sm btn-primary-custom" style="padding:6px 14px;">
                                 <i class="fas fa-download"></i>
                             </a>

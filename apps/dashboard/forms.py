@@ -33,7 +33,7 @@ class AppForm(forms.ModelForm):
             'name', 'category', 'short_description', 'description', 'version',
             'platform', 'license_type', 'file_size', 'release_date',
             'minimum_requirements', 'installation_instructions', 'logo', 'banner',
-            'installer_file', 'zip_file', 'website_url', 'github_url',
+            'installer_url', 'zip_url', 'website_url', 'github_url',
             'featured', 'published', 'meta_title', 'meta_description',
         ]
         widgets = {
@@ -54,10 +54,14 @@ class AppForm(forms.ModelForm):
             'license_type': forms.Select(attrs={'class': 'form-select'}),
             'logo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'banner': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'installer_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'zip_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'installer_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/you/app/releases/download/v1.0.0/app-setup.exe'}),
+            'zip_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/you/app/archive/refs/tags/v1.0.0.zip'}),
             'featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'installer_url': 'Installer file URL',
+            'zip_url': 'ZIP file URL',
         }
 
     def __init__(self, *args, **kwargs):
@@ -87,9 +91,11 @@ class AppForm(forms.ModelForm):
                 Column('logo', css_class='col-md-6'),
                 Column('banner', css_class='col-md-6'),
             ),
+            HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
+            HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-download me-2"></i>Download Files</h6>'),
             Row(
-                Column('installer_file', css_class='col-md-6'),
-                Column('zip_file', css_class='col-md-6'),
+                Column('installer_url', css_class='col-md-6'),
+                Column('zip_url', css_class='col-md-6'),
             ),
             HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
             HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-2"></i>Requirements & Installation</h6>'),
@@ -122,19 +128,21 @@ class VersionForm(forms.ModelForm):
         model = ApplicationVersion
         fields = [
             'version_number', 'release_date', 'changes', 'release_notes',
-            'installer_file', 'zip_file', 'file_size', 'is_current',
+            'installer_url', 'zip_url', 'file_size', 'is_current',
         ]
         widgets = {
             'version_number': forms.TextInput(attrs={'class': 'form-control'}),
             'release_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'changes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'release_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'installer_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'zip_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'installer_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
+            'zip_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'}),
             'file_size': forms.TextInput(attrs={'class': 'form-control'}),
             'is_current': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
+            'installer_url': 'Installer file URL',
+            'zip_url': 'ZIP file URL',
             'is_current': 'Set as current version',
         }
 
@@ -152,8 +160,8 @@ class VersionForm(forms.ModelForm):
             'release_notes',
             Row(
                 Column('file_size', css_class='col-md-4'),
-                Column('installer_file', css_class='col-md-4'),
-                Column('zip_file', css_class='col-md-4'),
+                Column('installer_url', css_class='col-md-4'),
+                Column('zip_url', css_class='col-md-4'),
             ),
             Row(
                 Column('is_current', css_class='col-auto'),

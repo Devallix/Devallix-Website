@@ -39,7 +39,7 @@
                 </div>
             </div>
             <!-- <div class="col-lg-4 text-lg-end">
-                {% if app.installer_file %}
+                {% if app.installer_url or app.zip_url %}
                 <a href="{% url 'desktop_apps:download_app' app.slug %}" class="btn btn-primary-custom btn-lg">
                     <i class="fas fa-download"></i> Download Now
                 </a>
@@ -105,8 +105,8 @@
                         {% if version.release_notes %}
                         <div class="mt-2" style="color:var(--text-dim);font-size:0.85rem;font-style:italic;">{{ version.release_notes|linebreaksbr }}</div>
                         {% endif %}
-                        {% if version.installer_file %}
-                        <a href="{{ version.installer_file.url }}" class="btn btn-sm btn-outline-custom mt-3" style="padding:6px 14px;">
+                        {% if version.installer_url or version.zip_url %}
+                        <a href="{{ version.installer_url|default:version.zip_url }}" class="btn btn-sm btn-outline-custom mt-3" style="padding:6px 14px;">
                             <i class="fas fa-download"></i> Download v{{ version.version_number }}
                         </a>
                         {% endif %}
@@ -142,7 +142,7 @@
                 <!-- Download Card -->
                 <div class="card-custom mb-4" data-aos="fade-left">
                     <div class="text-center mb-4">
-                        {% if app.installer_file %}
+                        {% if app.installer_url or app.zip_url %}
                         <a href="{% url 'desktop_apps:download_app' app.slug %}" class="btn btn-primary-custom btn-lg w-100 justify-content-center">
                             <i class="fas fa-download"></i> Download {{ app.name }}
                         </a>
