@@ -3,10 +3,11 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import (
     TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView
 )
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Q
 from django.http import JsonResponse, HttpResponse
 from apps.desktop_apps.models import DesktopApplication, ApplicationVersion, ApplicationCategory, Screenshot
 from apps.web_projects.models import WebProject
@@ -19,7 +20,11 @@ from apps.testimonials.models import Testimonial
 from apps.newsletter.models import NewsletterSubscriber, Newsletter
 from apps.downloads.models import Download
 from apps.accounts.models import Profile
-from .forms import AppForm, VersionForm, ProjectForm, SkillForm, BlogPostForm, TestimonialForm, CategoryForm, SiteSettingsForm, MobileAppForm, GraphicDesignForm
+from .forms import (
+    AppForm, VersionForm, ProjectForm, SkillForm, BlogPostForm,
+    TestimonialForm, CategoryForm, SiteSettingsForm, MobileAppForm,
+    GraphicDesignForm, BlogCategoryForm
+)
 
 
 class DashboardLoginRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -43,6 +48,8 @@ class DashboardHomeView(DashboardLoginRequiredMixin, TemplateView):
         context['unread_messages'] = ContactMessage.objects.filter(status='unread').count()
         context['total_subscribers'] = NewsletterSubscriber.objects.filter(is_active=True).count()
         context['total_posts'] = BlogPost.objects.count()
+        context['total_comments'] = Comment.objects.count()
+        context['pending_comments'] = Comment.objects.filter(is_approved=False).count()
         context['total_testimonials'] = Testimonial.objects.count()
         context['recent_messages'] = ContactMessage.objects.all()[:5]
         context['recent_downloads'] = Download.objects.select_related('application').all()[:5]
@@ -317,14 +324,25 @@ class BlogPostListView(DashboardLoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = BlogPost.objects.all()
-        search = self.request.GET.get('q')
+        qs = BlogPost.objects.select_related('author', 'category').all()
+        search = self.request.GET.get('search') or self.request.GET.get('q')
         status = self.request.GET.get('status')
+        category = self.request.GET.get('category')
         if search:
             qs = qs.filter(title__icontains=search)
         if status:
             qs = qs.filter(status=status)
+        if category:
+            qs = qs.filter(category__slug=category)
         return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = BlogCategory.objects.annotate(posts_count=Count('posts')).order_by('display_order', 'name')
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['search_query'] = self.request.GET.get('search') or self.request.GET.get('q') or ''
+        context['selected_status'] = self.request.GET.get('status', '')
+        return context
 
 
 class BlogPostCreateView(DashboardLoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -355,6 +373,67 @@ class BlogPostDeleteView(DashboardLoginRequiredMixin, DeleteView):
     template_name = 'dashboard/blog_confirm_delete.html'
     success_url = reverse_lazy('dashboard:blog_list')
     success_message = 'Blog post deleted successfully.'
+
+
+class BlogCategoryListView(DashboardLoginRequiredMixin, ListView):
+    model = BlogCategory
+    template_name = 'dashboard/blog_category_list.html'
+    context_object_name = 'categories'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = BlogCategory.objects.annotate(posts_count=Count('posts')).order_by('display_order', 'name')
+        search = self.request.GET.get('search') or self.request.GET.get('q')
+        if search:
+            qs = qs.filter(name__icontains=search)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search') or self.request.GET.get('q') or ''
+        return context
+
+
+class BlogCategoryCreateView(DashboardLoginRequiredMixin, SuccessMessageMixin, CreateView):
+    model = BlogCategory
+    template_name = 'dashboard/blog_category_form.html'
+    form_class = BlogCategoryForm
+    success_url = reverse_lazy('dashboard:blog_category_list')
+    success_message = 'Blog category created successfully.'
+
+    def form_valid(self, form):
+        self.object = form.save()
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'id': self.object.id,
+                'name': self.object.name,
+                'slug': self.object.slug,
+                'message': 'Category created successfully.'
+            })
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            errors = {field: [str(err) for err in error_list] for field, error_list in form.errors.items()}
+            return JsonResponse({'success': False, 'errors': errors}, status=400)
+        return super().form_invalid(form)
+
+
+class BlogCategoryUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = BlogCategory
+    template_name = 'dashboard/blog_category_form.html'
+    form_class = BlogCategoryForm
+    success_url = reverse_lazy('dashboard:blog_category_list')
+    success_message = 'Blog category updated successfully.'
+
+
+class BlogCategoryDeleteView(DashboardLoginRequiredMixin, DeleteView):
+    model = BlogCategory
+    template_name = 'dashboard/blog_category_confirm_delete.html'
+    context_object_name = 'category'
+    success_url = reverse_lazy('dashboard:blog_category_list')
+    success_message = 'Blog category deleted successfully.'
 
 
 class MessageListView(DashboardLoginRequiredMixin, ListView):
@@ -501,3 +580,74 @@ class SiteSettingsView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateV
     def get_object(self, queryset=None):
         from apps.core.models import SiteSettings
         return SiteSettings.load()
+
+
+class CommentListView(DashboardLoginRequiredMixin, ListView):
+    model = Comment
+    template_name = 'dashboard/comment_list.html'
+    context_object_name = 'comments'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = Comment.objects.select_related('post').all()
+        status = self.request.GET.get('status')
+        post_id = self.request.GET.get('post_id')
+        search = self.request.GET.get('q')
+
+        if status == 'approved':
+            qs = qs.filter(is_approved=True)
+        elif status == 'pending':
+            qs = qs.filter(is_approved=False)
+
+        if post_id:
+            qs = qs.filter(post_id=post_id)
+
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search) |
+                Q(body__icontains=search) |
+                Q(post__title__icontains=search)
+            )
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_comments'] = Comment.objects.count()
+        context['approved_comments'] = Comment.objects.filter(is_approved=True).count()
+        context['pending_comments'] = Comment.objects.filter(is_approved=False).count()
+        context['current_status'] = self.request.GET.get('status', '')
+        context['current_post_id'] = self.request.GET.get('post_id', '')
+        context['search_query'] = self.request.GET.get('q', '')
+        context['posts'] = BlogPost.objects.only('id', 'title').order_by('title')
+        return context
+
+
+class CommentToggleApprovalView(DashboardLoginRequiredMixin, View):
+    def post(self, request, pk):
+        comment = get_object_or_404(Comment, pk=pk)
+        comment.is_approved = not comment.is_approved
+        comment.save(update_fields=['is_approved'])
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'is_approved': comment.is_approved,
+                'message': f"Comment by {comment.name} is now {'approved' if comment.is_approved else 'hidden'}."
+            })
+
+        status_str = 'approved' if comment.is_approved else 'hidden'
+        messages.success(request, f"Comment has been {status_str}.")
+        return redirect('dashboard:comment_list')
+
+
+class CommentDeleteView(DashboardLoginRequiredMixin, DeleteView):
+    model = Comment
+    template_name = 'dashboard/comment_confirm_delete.html'
+    context_object_name = 'comment'
+    success_url = reverse_lazy('dashboard:comment_list')
+    success_message = 'Comment was deleted successfully.'
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, self.success_message)
+        return super().delete(request, *args, **kwargs)

@@ -2,11 +2,280 @@
 {% load humanize %}
 {% block title %}{{ post.title }} - Blog - {{ block.super }}{% endblock %}
 {% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.sidebar-post-item {
+    transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.sidebar-post-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(182, 255, 0, 0.35) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+.sidebar-post-thumb img {
+    transition: transform 0.3s ease;
+}
+.sidebar-post-item:hover .sidebar-post-thumb img {
+    transform: scale(1.08);
+}
+/* Article Engagement & Like Button */
+.btn-like {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    color: var(--text-white);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-like:hover {
+    background: rgba(255, 77, 77, 0.12);
+    border-color: rgba(255, 77, 77, 0.4);
+    color: #ff6b6b;
+    transform: translateY(-2px);
+}
+.btn-like.liked {
+    background: rgba(255, 77, 77, 0.18);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.25);
+}
+.btn-like .like-count-badge {
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.btn-like.liked .like-count-badge {
+    background: rgba(255, 107, 107, 0.25);
+}
+.btn-like .like-icon-wrap {
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+.heart-pop {
+    animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.comment-card {
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.comment-card:hover {
+    border-color: rgba(182, 255, 0, 0.3) !important;
+}
+@keyframes commentSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.comment-new-entry {
+    animation: commentSlideIn 0.45s ease-out;
+}
+
+/* ── Article Content Typography ──────────────────────────────── */
+.article-content {
+    color: var(--text-muted);
+    line-height: 1.9;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+    word-break: break-word;
+}
+/* Headings */
+.article-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin: 2rem 0 1rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    border-bottom: 2px solid rgba(182,255,0,0.15);
+    padding-bottom: 0.5rem;
+}
+.article-content h2 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin: 1.8rem 0 0.8rem;
+    line-height: 1.3;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+}
+.article-content h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-white);
+    margin: 1.5rem 0 0.6rem;
+    line-height: 1.35;
+}
+.article-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-white);
+    margin: 1.2rem 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+/* Paragraphs */
+.article-content p {
+    margin-bottom: 1.1rem;
+}
+.article-content p:last-child {
+    margin-bottom: 0;
+}
+/* Links */
+.article-content a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s ease;
+}
+.article-content a:hover {
+    color: var(--text-white);
+}
+/* Bold / Italic / Underline / Strikethrough */
+.article-content strong, .article-content b { color: var(--text-white); font-weight: 700; }
+.article-content em, .article-content i { font-style: italic; }
+.article-content u { text-decoration: underline; text-underline-offset: 2px; }
+.article-content s { text-decoration: line-through; opacity: 0.65; }
+/* Lists */
+.article-content ul,
+.article-content ol {
+    padding-left: 1.6rem;
+    margin-bottom: 1.1rem;
+    color: var(--text-muted);
+}
+.article-content li {
+    margin-bottom: 0.35rem;
+    line-height: 1.7;
+}
+.article-content ul li::marker { color: var(--accent); }
+.article-content ol li::marker { color: var(--accent); font-weight: 700; }
+/* Blockquote */
+.article-content blockquote {
+    border-left: 4px solid var(--accent);
+    margin: 1.5rem 0;
+    padding: 1rem 1.2rem;
+    background: rgba(182,255,0,0.04);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 1.05rem;
+    position: relative;
+}
+.article-content blockquote::before {
+    content: '\201C';
+    font-size: 3rem;
+    color: var(--accent);
+    opacity: 0.25;
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    line-height: 1;
+    font-family: Georgia, serif;
+    pointer-events: none;
+}
+/* Code — Inline */
+.article-content code {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.88rem;
+    color: #a6e22e;
+}
+/* Code — Block (Quill pre.ql-syntax) */
+.article-content pre,
+.article-content pre.ql-syntax {
+    background: #0d0d0d;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: #a6e22e;
+    overflow-x: auto;
+    margin-bottom: 1.2rem;
+    white-space: pre;
+}
+/* Images inside content */
+.article-content img {
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+}
+/* Horizontal rule */
+.article-content hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 2rem 0;
+}
+/* Tables */
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+}
+.article-content th {
+    background: var(--bg-secondary);
+    color: var(--text-white);
+    font-weight: 600;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    text-align: left;
+}
+.article-content td {
+    padding: 9px 14px;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+.article-content tr:hover td {
+    background: rgba(255,255,255,0.02);
+}
+/* Text alignment classes (Quill) */
+.article-content .ql-align-center { text-align: center; }
+.article-content .ql-align-right  { text-align: right; }
+.article-content .ql-align-justify { text-align: justify; }
+/* Indent support (Quill) */
+.article-content .ql-indent-1 { padding-left: 3em; }
+.article-content .ql-indent-2 { padding-left: 6em; }
+.article-content .ql-indent-3 { padding-left: 9em; }
+/* First h1 inside article should not have top margin */
+.article-content > h1:first-child,
+.article-content > h2:first-child,
+.article-content > h3:first-child { margin-top: 0; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header" style="padding-bottom:40px;">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8" data-aos="fade-up">
+        <div class="row {% if not trending_articles and not recent_articles %}justify-content-center{% endif %}">
+            <div class="{% if trending_articles or recent_articles %}col-lg-10{% else %}col-lg-8{% endif %}" data-aos="fade-up">
                 <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb" style="background:none;padding:0;margin:0;">
                         <li class="breadcrumb-item"><a href="{% url 'core:home' %}" style="color:var(--text-dim);">Home</a></li>
@@ -17,12 +286,14 @@
                         <li class="breadcrumb-item active" style="color:var(--accent-primary);">{{ post.title|truncatewords:5 }}</li>
                     </ol>
                 </nav>
-                <div class="d-flex flex-wrap gap-2 mb-3">
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
                     {% if post.category %}
                     <span class="badge-custom">{{ post.category.name }}</span>
                     {% endif %}
                     <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"M d, Y" }}</span>
                     <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-eye me-1"></i>{{ post.views_count|intcomma }} views</span>
+                    <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-heart text-danger me-1"></i><span id="header-likes-count">{{ likes_count }}</span> likes</span>
+                    <a href="#comments-section" style="color:var(--text-dim);font-size:0.85rem;text-decoration:none;"><i class="fas fa-comments text-info me-1"></i><span id="header-comments-count">{{ comments.count }}</span> comments</a>
                 </div>
                 <h1 class="fw-bold" style="font-size:2.2rem;">{{ post.title }}</h1>
             </div>
@@ -32,8 +303,9 @@
 
 <section class="section-padding" style="padding-top:20px;">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
+        <div class="row g-5 {% if not trending_articles and not recent_articles %}justify-content-center{% endif %}">
+            <!-- Main Content Column -->
+            <div class="{% if trending_articles or recent_articles %}col-lg-8{% else %}col-lg-8{% endif %}">
                 {% if post.featured_image %}
                 <div class="mb-4" data-aos="fade-up">
                     <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" style="width:100%;border-radius:var(--radius-lg);object-fit:cover;max-height:400px;">
@@ -53,7 +325,7 @@
 
                 <!-- Content -->
                 <div class="mb-5" data-aos="fade-up">
-                    <div style="color:var(--text-muted);line-height:1.9;font-size:1.05rem;">{{ post.content|linebreaksbr }}</div>
+                    <div class="article-content">{{ post.content|safe }}</div>
                 </div>
 
                 <!-- Tags -->
@@ -68,36 +340,125 @@
                 </div>
                 {% endif %}
 
-                <!-- Share -->
-                <div class="mb-5" data-aos="fade-up">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-share me-2" style="color:var(--accent-secondary);"></i>Share This Post</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" class="icon-box icon-box-accent" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" class="icon-box icon-box-accent" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" class="icon-box icon-box-accent" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                <!-- Article Engagement & Share Bar -->
+                <div class="card-custom p-4 mb-5" id="like-section" data-aos="fade-up" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <!-- Like Button -->
+                        <div class="d-flex align-items-center gap-3">
+                            <form method="post" action="{% url 'blog:post_like_toggle' post.slug %}" id="like-form" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" id="like-btn" class="btn-like {% if has_liked %}liked{% endif %}" title="{% if has_liked %}Unlike this article{% else %}Like this article{% endif %}" data-liked="{% if has_liked %}true{% else %}false{% endif %}">
+                                    <span class="like-icon-wrap">
+                                        <i class="{% if has_liked %}fas text-danger{% else %}far{% endif %} fa-heart" id="like-heart-icon"></i>
+                                    </span>
+                                    <span id="like-btn-label">{% if has_liked %}Liked{% else %}Like Article{% endif %}</span>
+                                    <span class="like-count-badge" id="like-count-display">{{ likes_count }}</span>
+                                </button>
+                            </form>
+                            <span style="color:var(--text-dim);font-size:0.85rem;" id="like-feedback-msg" class="d-none d-sm-inline">
+                                {% if has_liked %}You liked this article!{% else %}Enjoyed this article? Give it a like!{% endif %}
+                            </span>
+                        </div>
+
+                        <!-- Share Icons -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="color:var(--text-dim);font-size:0.85rem;margin-right:4px;"><i class="fas fa-share-alt me-1"></i>Share:</span>
+                            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title|urlencode }}" class="icon-box icon-box-accent" target="_blank" title="Share on Twitter / X"><i class="fab fa-twitter"></i></a>
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ post.title|urlencode }}" class="icon-box icon-box-accent" target="_blank" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" class="icon-box icon-box-accent" target="_blank" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <button type="button" class="icon-box icon-box-accent" id="copy-link-btn" title="Copy article link" style="border:none;cursor:pointer;"><i class="fas fa-link"></i></button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Comments -->
-                {% if comments %}
-                <div class="mb-5" data-aos="fade-up">
-                    <h5 class="fw-bold mb-4"><i class="fas fa-comments me-2" style="color:var(--accent-primary);"></i>Comments ({{ comments.count }})</h5>
-                    {% for comment in comments %}
-                    <div class="card-custom mb-3 p-4">
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <span style="color:var(--bg-primary);font-weight:700;font-size:0.8rem;">{{ comment.name.0|upper }}</span>
+                <!-- Comments & Feedback Section -->
+                <div class="mb-5" id="comments-section" data-aos="fade-up">
+                    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                        <h4 class="fw-bold mb-0 d-flex align-items-center" style="font-size:1.35rem;">
+                            <i class="fas fa-comments me-2" style="color:var(--accent-primary);"></i>
+                            Comments &amp; Feedback
+                            <span class="badge ms-2" id="comments-count-badge" style="background:rgba(182,255,0,0.12);color:var(--accent-primary);border:1px solid rgba(182,255,0,0.25);font-size:0.85rem;padding:4px 10px;border-radius:20px;">{{ comments.count }}</span>
+                        </h4>
+                    </div>
+
+                    <!-- Leave a Comment Form Card -->
+                    <div class="card-custom p-4 mb-4" id="comment-form-container" style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width:36px;height:36px;border-radius:50%;background:rgba(182,255,0,0.15);display:flex;align-items:center;justify-content:center;color:var(--accent-primary);flex-shrink:0;">
+                                <i class="fas fa-pen" style="font-size:0.85rem;"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold mb-0" style="font-size:0.95rem;">{{ comment.name }}</h6>
-                                <small style="color:var(--text-dim);">{{ comment.created_at|timesince }} ago</small>
+                                <h5 class="fw-bold mb-0" style="font-size:1.05rem;">Leave a Comment</h5>
+                                <small style="color:var(--text-dim);">Share your feedback, insights, or questions after reading.</small>
                             </div>
                         </div>
-                        <p style="color:var(--text-muted);font-size:0.9rem;margin:0;">{{ comment.body }}</p>
+
+                        <!-- Dynamic Alert Message -->
+                        <div id="comment-form-alert" class="alert d-none mb-3" role="alert" style="border-radius:var(--radius-sm);font-size:0.9rem;"></div>
+
+                        <form method="post" action="{% url 'blog:post_comment' post.slug %}" id="comment-post-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="comment_name" class="form-label" style="font-weight:600;font-size:0.9rem;color:var(--text-white);">
+                                    Your Name <span style="color:var(--accent-primary);">*</span>
+                                </label>
+                                <input type="text" name="name" id="comment_name" class="form-control" placeholder="What's your name or nickname?" required maxlength="100" style="background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-white);padding:10px 14px;border-radius:var(--radius-sm);">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="comment_body" class="form-label" style="font-weight:600;font-size:0.9rem;color:var(--text-white);">
+                                    Your Comment <span style="color:var(--accent-primary);">*</span>
+                                </label>
+                                <textarea name="body" id="comment_body" class="form-control" rows="4" placeholder="Write your thoughts, feedback, or response..." required style="background:var(--bg-primary);border:1px solid var(--border-color);color:var(--text-white);padding:10px 14px;border-radius:var(--radius-sm);"></textarea>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <small style="color:var(--text-dim);font-size:0.8rem;">
+                                    <i class="fas fa-check-circle me-1" style="color:var(--accent-primary);"></i>Comments appear directly with your posting date.
+                                </small>
+                                <button type="submit" id="submit-comment-button" class="btn btn-accent d-inline-flex align-items-center gap-2" style="padding:10px 24px;font-weight:600;">
+                                    <i class="fas fa-paper-plane" id="submit-icon"></i>
+                                    <span id="submit-text">Post Comment</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    {% endfor %}
+
+                    <!-- Comments List Container -->
+                    <div id="comments-list" class="d-flex flex-column gap-3">
+                        {% for comment in comments %}
+                        <div class="card-custom p-4 comment-card" id="comment-{{ comment.pk }}" style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="comment-avatar" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                                        <span style="color:var(--bg-primary);font-weight:700;font-size:0.9rem;">{{ comment.name.0|upper }}</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0" style="font-size:0.95rem;color:var(--text-white);">{{ comment.name }}</h6>
+                                        <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                            <span style="color:var(--text-dim);font-size:0.8rem;" title="{{ comment.created_at|date:'F d, Y at h:i A' }}">
+                                                <i class="far fa-calendar-alt me-1" style="color:var(--accent-primary);"></i>{{ comment.created_at|date:"M d, Y" }} at {{ comment.created_at|date:"h:i A" }}
+                                            </span>
+                                            <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-dim);font-size:0.75rem;padding:2px 7px;border-radius:6px;font-weight:400;">
+                                                <i class="far fa-clock me-1"></i>{{ comment.created_at|timesince }} ago
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="comment-body mt-2 mb-0" style="color:var(--text-muted);font-size:0.95rem;line-height:1.7;">{{ comment.body|linebreaksbr }}</p>
+                        </div>
+                        {% empty %}
+                        <div id="no-comments-placeholder" class="card-custom p-5 text-center" style="background:var(--bg-secondary);border:1px dashed var(--border-color);border-radius:var(--radius-lg);">
+                            <div style="width:64px;height:64px;border-radius:50%;background:rgba(182,255,0,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--accent-primary);">
+                                <i class="far fa-comments" style="font-size:1.8rem;"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1" style="color:var(--text-white);">No Comments Yet</h6>
+                            <p style="color:var(--text-dim);font-size:0.9rem;margin:0;">Be the first reader to share your feedback or thoughts on this article!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
-                {% endif %}
 
                 <!-- Related Posts -->
                 {% if related_posts %}
@@ -121,7 +482,291 @@
                 </div>
                 {% endif %}
             </div>
+
+            <!-- Right Sidebar Column -->
+            {% if trending_articles or recent_articles %}
+            <div class="col-lg-4">
+                <div class="sidebar-sticky" style="position:sticky;top:100px;">
+                    <!-- Trending / Must Read Section -->
+                    {% if trending_articles %}
+                    <div class="card-custom mb-4" data-aos="fade-left">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="fw-bold mb-0 d-flex align-items-center" style="font-size:1rem;color:var(--text-white);">
+                                <i class="fas fa-fire me-2" style="color:#ff6b6b;font-size:1.1rem;"></i>
+                                Trending / Must Read
+                            </h6>
+                            <span class="badge" style="background:rgba(255,107,107,0.15);color:#ff6b6b;font-size:0.7rem;padding:3px 8px;border-radius:6px;border:1px solid rgba(255,107,107,0.25);">Hot</span>
+                        </div>
+                        <div class="divider mb-3" style="margin:0;width:40px;height:2px;background:linear-gradient(90deg, #ff6b6b, transparent);"></div>
+
+                        <div class="d-flex flex-column gap-3">
+                            {% for item in trending_articles %}
+                            <div class="sidebar-post-item d-flex gap-3 align-items-start p-2 rounded" style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                                <!-- Thumbnail Link -->
+                                <a href="{{ item.get_absolute_url }}" class="sidebar-post-thumb flex-shrink-0" style="width:75px;height:75px;border-radius:8px;overflow:hidden;display:block;background:var(--bg-secondary);" title="{{ item.title }}">
+                                    {% if item.featured_image %}
+                                    <img src="{{ item.featured_image.url }}" alt="{{ item.title }}" style="width:100%;height:100%;object-fit:cover;">
+                                    {% else %}
+                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-secondary),var(--bg-primary));">
+                                        <i class="fas fa-fire" style="font-size:1.2rem;color:#ff6b6b;opacity:0.4;"></i>
+                                    </div>
+                                    {% endif %}
+                                </a>
+
+                                <!-- Content & Details -->
+                                <div class="flex-grow-1 min-w-0">
+                                    <h6 class="mb-1" style="font-size:0.875rem;font-weight:600;line-height:1.35;">
+                                        <a href="{{ item.get_absolute_url }}" style="color:var(--text-white);text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" onmouseover="this.style.color='var(--accent-primary)'" onmouseout="this.style.color='var(--text-white)'">
+                                            {{ item.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1" style="color:var(--text-muted);font-size:0.75rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;">
+                                        {{ item.excerpt|default:item.content|striptags|truncatewords:10 }}
+                                    </p>
+                                    <div class="d-flex align-items-center gap-2" style="font-size:0.7rem;color:var(--text-dim);">
+                                        {% if item.category %}
+                                        <span class="badge-custom" style="font-size:0.65rem;padding:1px 6px;">{{ item.category.name }}</span>
+                                        {% endif %}
+                                        <span><i class="fas fa-eye me-1"></i>{{ item.views_count|intcomma }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Recent Articles Section -->
+                    {% if recent_articles %}
+                    <div class="card-custom mb-4" data-aos="fade-left" data-aos-delay="100">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="fw-bold mb-0 d-flex align-items-center" style="font-size:1rem;color:var(--text-white);">
+                                <i class="fas fa-clock me-2" style="color:var(--accent-primary);font-size:1.05rem;"></i>
+                                Recent Articles
+                            </h6>
+                            <span class="badge" style="background:rgba(182,255,0,0.15);color:var(--accent);font-size:0.7rem;padding:3px 8px;border-radius:6px;border:1px solid rgba(182,255,0,0.25);">New</span>
+                        </div>
+                        <div class="divider mb-3" style="margin:0;width:40px;height:2px;background:linear-gradient(90deg, var(--accent-primary), transparent);"></div>
+
+                        <div class="d-flex flex-column gap-3">
+                            {% for item in recent_articles %}
+                            <div class="sidebar-post-item d-flex gap-3 align-items-start p-2 rounded" style="background:var(--bg-primary);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                                <!-- Thumbnail Link -->
+                                <a href="{{ item.get_absolute_url }}" class="sidebar-post-thumb flex-shrink-0" style="width:75px;height:75px;border-radius:8px;overflow:hidden;display:block;background:var(--bg-secondary);" title="{{ item.title }}">
+                                    {% if item.featured_image %}
+                                    <img src="{{ item.featured_image.url }}" alt="{{ item.title }}" style="width:100%;height:100%;object-fit:cover;">
+                                    {% else %}
+                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg-secondary),var(--bg-primary));">
+                                        <i class="fas fa-pen-nib" style="font-size:1.2rem;color:var(--accent-primary);opacity:0.4;"></i>
+                                    </div>
+                                    {% endif %}
+                                </a>
+
+                                <!-- Content & Details -->
+                                <div class="flex-grow-1 min-w-0">
+                                    <h6 class="mb-1" style="font-size:0.875rem;font-weight:600;line-height:1.35;">
+                                        <a href="{{ item.get_absolute_url }}" style="color:var(--text-white);text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" onmouseover="this.style.color='var(--accent-primary)'" onmouseout="this.style.color='var(--text-white)'">
+                                            {{ item.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="mb-1" style="color:var(--text-muted);font-size:0.75rem;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;">
+                                        {{ item.excerpt|default:item.content|striptags|truncatewords:10 }}
+                                    </p>
+                                    <div class="d-flex align-items-center gap-2" style="font-size:0.7rem;color:var(--text-dim);">
+                                        {% if item.category %}
+                                        <span class="badge-custom" style="font-size:0.65rem;padding:1px 6px;">{{ item.category.name }}</span>
+                                        {% endif %}
+                                        <span><i class="fas fa-calendar me-1"></i>{{ item.published_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like button AJAX interaction
+    const likeForm = document.getElementById('like-form');
+    if (likeForm) {
+        likeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('like-btn');
+            const heartIcon = document.getElementById('like-heart-icon');
+            const countDisplay = document.getElementById('like-count-display');
+            const headerLikesCount = document.getElementById('header-likes-count');
+            const label = document.getElementById('like-btn-label');
+            const feedbackMsg = document.getElementById('like-feedback-msg');
+            const url = likeForm.getAttribute('action');
+            const csrfInput = likeForm.querySelector('[name=csrfmiddlewaretoken]');
+            const csrf = csrfInput ? csrfInput.value : '';
+
+            btn.disabled = true;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrf,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.status === 'success') {
+                    countDisplay.textContent = data.likes_count;
+                    if (headerLikesCount) headerLikesCount.textContent = data.likes_count;
+
+                    if (data.liked) {
+                        btn.classList.add('liked');
+                        btn.setAttribute('data-liked', 'true');
+                        btn.title = 'Unlike this article';
+                        heartIcon.className = 'fas fa-heart text-danger heart-pop';
+                        label.textContent = 'Liked';
+                        if (feedbackMsg) feedbackMsg.textContent = 'Thank you for liking this article!';
+                    } else {
+                        btn.classList.remove('liked');
+                        btn.setAttribute('data-liked', 'false');
+                        btn.title = 'Like this article';
+                        heartIcon.className = 'far fa-heart';
+                        label.textContent = 'Like Article';
+                        if (feedbackMsg) feedbackMsg.textContent = 'Enjoyed this article? Give it a like!';
+                    }
+                    setTimeout(() => heartIcon.classList.remove('heart-pop'), 500);
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                likeForm.submit();
+            });
+        });
+    }
+
+    // Comment form AJAX interaction
+    const commentForm = document.getElementById('comment-post-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-comment-button');
+            const submitText = document.getElementById('submit-text');
+            const submitIcon = document.getElementById('submit-icon');
+            const alertBox = document.getElementById('comment-form-alert');
+            const nameInput = document.getElementById('comment_name');
+            const bodyInput = document.getElementById('comment_body');
+            const commentsList = document.getElementById('comments-list');
+            const placeholder = document.getElementById('no-comments-placeholder');
+            const badgeCount = document.getElementById('comments-count-badge');
+            const headerCommentsCount = document.getElementById('header-comments-count');
+            const url = commentForm.getAttribute('action');
+            const formData = new FormData(commentForm);
+
+            submitBtn.disabled = true;
+            submitIcon.className = 'fas fa-spinner fa-spin';
+            submitText.textContent = 'Posting...';
+            alertBox.className = 'alert d-none';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitIcon.className = 'fas fa-paper-plane';
+                submitText.textContent = 'Post Comment';
+
+                if (data.status === 'success') {
+                    alertBox.className = 'alert alert-success d-block';
+                    alertBox.style = 'background:rgba(40,167,69,0.15);color:#28a745;border:1px solid rgba(40,167,69,0.3);border-radius:var(--radius-sm);';
+                    alertBox.innerHTML = '<i class="fas fa-check-circle me-1"></i> ' + data.message;
+                    
+                    nameInput.value = '';
+                    bodyInput.value = '';
+
+                    if (placeholder) {
+                        placeholder.style.display = 'none';
+                    }
+
+                    const comment = data.comment;
+                    const newCommentEl = document.createElement('div');
+                    newCommentEl.className = 'card-custom p-4 comment-card comment-new-entry';
+                    newCommentEl.id = 'comment-' + comment.id;
+                    newCommentEl.style = 'background:var(--bg-primary);border:1px solid rgba(182,255,0,0.35);border-radius:var(--radius-md);';
+                    newCommentEl.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="comment-avatar" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                                    <span style="color:var(--bg-primary);font-weight:700;font-size:0.9rem;">${comment.initial}</span>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0" style="font-size:0.95rem;color:var(--text-white);">${escapeHtml(comment.name)}</h6>
+                                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                        <span style="color:var(--text-dim);font-size:0.8rem;">
+                                            <i class="far fa-calendar-alt me-1" style="color:var(--accent-primary);"></i>${comment.created_at}
+                                        </span>
+                                        <span class="badge" style="background:rgba(182,255,0,0.15);color:var(--accent-primary);font-size:0.75rem;padding:2px 7px;border-radius:6px;font-weight:500;">
+                                            Just now
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="comment-body mt-2 mb-0" style="color:var(--text-muted);font-size:0.95rem;line-height:1.7;">${escapeHtml(comment.body).replace(/\n/g, '<br>')}</p>
+                    `;
+                    commentsList.prepend(newCommentEl);
+
+                    if (badgeCount) badgeCount.textContent = data.comments_count;
+                    if (headerCommentsCount) headerCommentsCount.textContent = data.comments_count;
+
+                    setTimeout(() => {
+                        alertBox.className = 'alert d-none';
+                    }, 5000);
+                } else {
+                    alertBox.className = 'alert alert-danger d-block';
+                    alertBox.style = 'background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);border-radius:var(--radius-sm);';
+                    alertBox.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> ' + (data.message || 'Error posting comment.');
+                }
+            })
+            .catch(err => {
+                submitBtn.disabled = false;
+                submitIcon.className = 'fas fa-paper-plane';
+                submitText.textContent = 'Post Comment';
+                commentForm.submit();
+            });
+        });
+    }
+
+    // Copy link button
+    const copyBtn = document.getElementById('copy-link-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const originalHtml = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                copyBtn.title = 'Link copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalHtml;
+                    copyBtn.title = 'Copy article link';
+                }, 2000);
+            });
+        });
+    }
+
+    function escapeHtml(text) {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text ? String(text).replace(/[&<>"']/g, m => map[m]) : '';
+    }
+});
+</script>
 {% endblock %}

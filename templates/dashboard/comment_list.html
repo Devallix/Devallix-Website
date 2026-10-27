@@ -1,0 +1,268 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load humanize %}
+{% block title %}Manage Comments - Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-badge-approved {
+    background: rgba(40,167,69,0.15);
+    color: #28a745;
+    border: 1px solid rgba(40,167,69,0.3);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+.status-badge-hidden {
+    background: rgba(255,193,7,0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255,193,7,0.3);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="page-title">Blog Comments</h4>
+            <p style="color:var(--text-dim);margin:0;">Review, moderate, and manage comments across your blog articles.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent">
+                <i class="fas fa-blog me-1"></i> Back to Blog Posts
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-card p-3 d-flex align-items-center gap-3">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(182,255,0,0.12);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.2rem;">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">{{ total_comments }}</h5>
+                    <small style="color:var(--text-dim);">Total Comments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card p-3 d-flex align-items-center gap-3">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(40,167,69,0.12);display:flex;align-items:center;justify-content:center;color:#28a745;font-size:1.2rem;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0 text-success">{{ approved_comments }}</h5>
+                    <small style="color:var(--text-dim);">Published & Approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card p-3 d-flex align-items-center gap-3">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,193,7,0.12);display:flex;align-items:center;justify-content:center;color:#ffc107;font-size:1.2rem;">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0 text-warning">{{ pending_comments }}</h5>
+                    <small style="color:var(--text-dim);">Pending / Hidden</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <!-- Search and Filters Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <form method="get" class="d-flex gap-2 flex-wrap align-items-center" style="max-width:700px;">
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="Search author, text, or post..." value="{{ search_query|default:'' }}" style="max-width:220px;">
+                
+                <select name="status" class="form-select form-select-sm" style="max-width:140px;" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Hidden / Pending</option>
+                </select>
+
+                <select name="post_id" class="form-select form-select-sm" style="max-width:200px;" onchange="this.form.submit()">
+                    <option value="">All Articles</option>
+                    {% for p in posts %}
+                    <option value="{{ p.pk }}" {% if current_post_id == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.title|truncatechars:28 }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-accent btn-sm" title="Search"><i class="fas fa-search"></i></button>
+                {% if search_query or current_status or current_post_id %}
+                <a href="{% url 'dashboard:comment_list' %}" class="btn btn-outline-accent btn-sm" title="Clear all filters"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+            <div style="color:var(--text-dim);font-size:0.85rem;">
+                Showing {{ comments|length }} comment{{ comments|length|pluralize }}
+            </div>
+        </div>
+
+        <!-- Comments Table -->
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th style="width:200px;">Author</th>
+                        <th>Comment</th>
+                        <th style="width:200px;">Article</th>
+                        <th style="width:130px;">Posted Date</th>
+                        <th style="width:110px;">Status</th>
+                        <th style="width:130px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in comments %}
+                    <tr id="comment-row-{{ c.pk }}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <span style="color:var(--bg-primary);font-weight:700;font-size:0.8rem;">{{ c.name.0|upper }}</span>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" style="font-size:0.9rem;">{{ c.name }}</div>
+                                    {% if c.ip_address %}
+                                    <small style="color:var(--text-dim);font-size:0.75rem;"><i class="fas fa-network-wired me-1"></i>{{ c.ip_address }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;max-width:450px;">
+                                {{ c.body|linebreaksbr }}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ c.post.get_absolute_url }}" target="_blank" style="color:var(--text-white);text-decoration:none;font-size:0.85rem;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" title="{{ c.post.title }}">
+                                {{ c.post.title }}
+                                <i class="fas fa-external-link-alt ms-1" style="font-size:0.7rem;color:var(--accent);"></i>
+                            </a>
+                        </td>
+                        <td>
+                            <div style="font-size:0.8rem;color:var(--text-white);">{{ c.created_at|date:"M d, Y" }}</div>
+                            <small style="color:var(--text-dim);font-size:0.75rem;">{{ c.created_at|date:"H:i" }} ({{ c.created_at|timesince }} ago)</small>
+                        </td>
+                        <td>
+                            <span id="status-badge-{{ c.pk }}" class="badge {% if c.is_approved %}status-badge-approved{% else %}status-badge-hidden{% endif %}">
+                                {% if c.is_approved %}Approved{% else %}Hidden{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 align-items-center">
+                                <form method="post" action="{% url 'dashboard:comment_toggle_approval' c.pk %}" class="d-inline toggle-approval-form" data-comment-id="{{ c.pk }}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm {% if c.is_approved %}btn-outline-warning{% else %}btn-outline-success{% endif %}" id="toggle-btn-{{ c.pk }}" title="{% if c.is_approved %}Hide comment{% else %}Approve comment{% endif %}" style="padding:3px 8px;">
+                                        <i class="fas {% if c.is_approved %}fa-eye-slash{% else %}fa-check{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <a href="{% url 'dashboard:comment_delete' c.pk %}" class="btn btn-sm" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);padding:3px 8px;" title="Delete comment">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div style="width:60px;height:60px;border-radius:50%;background:rgba(182,255,0,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:var(--accent);">
+                                <i class="fas fa-comments" style="font-size:1.6rem;"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">No comments found</h6>
+                            <p style="color:var(--text-dim);font-size:0.85rem;margin:0;">
+                                {% if search_query or current_status or current_post_id %}
+                                No comments match your current filter criteria.
+                                {% else %}
+                                Reader comments will appear here as soon as they are submitted on articles.
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top:1px solid var(--border-color);">
+            <div style="color:var(--text-dim);font-size:0.85rem;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_post_id %}&post_id={{ current_post_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo;</a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_post_id %}&post_id={{ current_post_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_post_id %}&post_id={{ current_post_id }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.toggle-approval-form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentId = form.getAttribute('data-comment-id');
+            const url = form.getAttribute('action');
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            const btn = document.getElementById('toggle-btn-' + commentId);
+            const badge = document.getElementById('status-badge-' + commentId);
+
+            btn.disabled = true;
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.success) {
+                    if (data.is_approved) {
+                        badge.textContent = 'Approved';
+                        badge.classList.remove('status-badge-hidden');
+                        badge.classList.add('status-badge-approved');
+                        btn.className = 'btn btn-sm btn-outline-warning';
+                        btn.title = 'Hide comment';
+                        btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    } else {
+                        badge.textContent = 'Hidden';
+                        badge.classList.remove('status-badge-approved');
+                        badge.classList.add('status-badge-hidden');
+                        btn.className = 'btn btn-sm btn-outline-success';
+                        btn.title = 'Approve comment';
+                        btn.innerHTML = '<i class="fas fa-check"></i>';
+                    }
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                form.submit(); // fallback to standard submit
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -3,26 +3,48 @@
 
 {% block content %}
 <div class="page-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
             <h4 class="page-title">Blog Posts</h4>
-            <p style="color:var(--text-dim);margin:0;">Manage your blog content.</p>
+            <p style="color:var(--text-dim);margin:0;">Manage and categorize your blog content.</p>
         </div>
-        <a href="{% url 'dashboard:blog_create' %}" class="btn btn-accent">
-            <i class="fas fa-plus me-1"></i> New Post
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'dashboard:comment_list' %}" class="btn btn-outline-accent">
+                <i class="fas fa-comments me-1"></i> Comments
+            </a>
+            <a href="{% url 'dashboard:blog_category_list' %}" class="btn btn-outline-accent">
+                <i class="fas fa-folder me-1"></i> Manage Categories
+            </a>
+            <button type="button" class="btn btn-outline-accent" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                <i class="fas fa-folder-plus me-1"></i> Create Category
+            </button>
+            <a href="{% url 'dashboard:blog_create' %}" class="btn btn-accent">
+                <i class="fas fa-plus me-1"></i> New Post
+            </a>
+        </div>
     </div>
 
     <div class="dashboard-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <form method="get" class="d-flex gap-2" style="max-width:400px;">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search posts..." value="{{ search_query|default:'' }}">
-                <button type="submit" class="btn btn-accent btn-sm"><i class="fas fa-search"></i></button>
-                {% if search_query %}
-                <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent btn-sm"><i class="fas fa-times"></i></a>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <form method="get" class="d-flex gap-2 flex-wrap align-items-center" style="max-width:650px;">
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search posts..." value="{{ search_query|default:'' }}" style="max-width:200px;">
+                <select name="category" class="form-select form-select-sm" style="max-width:180px;" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }} ({{ cat.posts_count }})</option>
+                    {% endfor %}
+                </select>
+                <select name="status" class="form-select form-select-sm" style="max-width:140px;" onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    <option value="published" {% if selected_status == 'published' %}selected{% endif %}>Published</option>
+                    <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>Draft</option>
+                </select>
+                <button type="submit" class="btn btn-accent btn-sm" title="Search"><i class="fas fa-search"></i></button>
+                {% if search_query or selected_category or selected_status %}
+                <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent btn-sm" title="Clear all filters"><i class="fas fa-times"></i></a>
                 {% endif %}
             </form>
-            <span style="color:var(--text-dim);font-size:0.85rem;">{{ posts.paginator.count }} total</span>
+            <span style="color:var(--text-dim);font-size:0.85rem;">{{ posts.paginator.count }} total post{{ posts.paginator.count|pluralize }}</span>
         </div>
 
         <div class="table-responsive">
@@ -33,7 +55,7 @@
                         <th>Author</th>
                         <th>Status</th>
                         <th>Category</th>
-                        <th>Featured</th>
+                        <th>Highlights</th>
                         <th style="width:150px;">Actions</th>
                     </tr>
                 </thead>
@@ -51,9 +73,15 @@
                                 {% endif %}
                                 <div>
                                     <span style="font-weight:600;">{{ post.title|truncatewords:8 }}</span>
-                                    {% if post.published_at %}
-                                    <div style="color:var(--text-dim);font-size:0.8rem;">{{ post.published_at|date:"M d, Y" }}</div>
-                                    {% endif %}
+                                    <div class="d-flex align-items-center gap-2 mt-1" style="font-size:0.75rem;color:var(--text-dim);">
+                                        {% if post.published_at %}
+                                        <span><i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"M d, Y" }}</span>
+                                        {% endif %}
+                                        <span><i class="fas fa-heart text-danger me-1"></i>{{ post.likes_count }}</span>
+                                        <a href="{% url 'dashboard:comment_list' %}?post_id={{ post.pk }}" style="color:var(--accent);text-decoration:none;" title="View comments">
+                                            <i class="fas fa-comments me-1"></i>{{ post.approved_comments_count }}
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -65,16 +93,36 @@
                             <span style="background:rgba(255,193,7,0.15);color:#ffc107;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Draft</span>
                             {% endif %}
                         </td>
-                        <td style="color:var(--text-muted);">{{ post.category|default:"—" }}</td>
                         <td>
-                            {% if post.featured %}
-                            <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:0.75rem;">Featured</span>
+                            {% if post.category %}
+                            <a href="{% url 'dashboard:blog_list' %}?category={{ post.category.slug }}" class="badge" style="background:rgba(182,255,0,0.12);color:var(--accent);text-decoration:none;border:1px solid rgba(182,255,0,0.25);font-size:0.75rem;padding:4px 8px;border-radius:6px;" title="Filter by {{ post.category.name }}">
+                                <i class="fas fa-folder me-1" style="font-size:0.65rem;"></i>{{ post.category.name }}
+                            </a>
                             {% else %}
-                            <span style="color:var(--text-dim);font-size:0.85rem;">—</span>
+                            <span style="color:var(--text-dim);font-size:0.8rem;">—</span>
                             {% endif %}
                         </td>
                         <td>
+                            <div class="d-flex flex-column gap-1 align-items-start">
+                                {% if post.featured %}
+                                <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:2px 6px;border-radius:4px;font-size:0.7rem;"><i class="fas fa-star me-1"></i>Featured</span>
+                                {% endif %}
+                                {% if post.is_recent %}
+                                <span style="background:rgba(52,152,219,0.15);color:#3498db;padding:2px 6px;border-radius:4px;font-size:0.7rem;"><i class="fas fa-clock me-1"></i>Recent</span>
+                                {% endif %}
+                                {% if post.is_trending %}
+                                <span style="background:rgba(231,76,60,0.15);color:#e74c3c;padding:2px 6px;border-radius:4px;font-size:0.7rem;"><i class="fas fa-fire me-1"></i>Trending</span>
+                                {% endif %}
+                                {% if not post.featured and not post.is_recent and not post.is_trending %}
+                                <span style="color:var(--text-dim);font-size:0.85rem;">—</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
                             <div class="d-flex gap-1">
+                                <a href="{% url 'dashboard:comment_list' %}?post_id={{ post.pk }}" class="btn btn-outline-accent btn-sm" title="Comments">
+                                    <i class="fas fa-comments"></i>
+                                </a>
                                 <a href="{% url 'dashboard:blog_edit' pk=post.pk %}" class="btn btn-outline-accent btn-sm" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
@@ -105,7 +153,7 @@
                 <ul class="pagination pagination-sm mb-0">
                     {% if posts.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ posts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                        <a class="page-link" href="?page={{ posts.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     </li>
@@ -117,13 +165,13 @@
                     </li>
                     {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--text-muted);">{{ num }}</a>
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--text-muted);">{{ num }}</a>
                     </li>
                     {% endif %}
                     {% endfor %}
                     {% if posts.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ posts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                        <a class="page-link" href="?page={{ posts.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>
@@ -134,4 +182,6 @@
         {% endif %}
     </div>
 </div>
+
+{% include 'dashboard/includes/blog_category_modal.html' %}
 {% endblock %}

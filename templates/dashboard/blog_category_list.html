@@ -1,0 +1,136 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% block title %}Blog Categories{% endblock %}
+
+{% block content %}
+<div class="page-section">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="page-title">Blog Categories</h4>
+            <p style="color:var(--text-dim);margin:0;">Group and organize your blog posts into topics.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent">
+                <i class="fas fa-arrow-left me-1"></i> Back to Blog Posts
+            </a>
+            <button type="button" class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                <i class="fas fa-plus me-1"></i> New Category
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <form method="get" class="d-flex gap-2" style="max-width:400px;">
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search categories..." value="{{ search_query|default:'' }}">
+                <button type="submit" class="btn btn-accent btn-sm"><i class="fas fa-search"></i></button>
+                {% if search_query %}
+                <a href="{% url 'dashboard:blog_category_list' %}" class="btn btn-outline-accent btn-sm"><i class="fas fa-times"></i></a>
+                {% endif %}
+            </form>
+            <span style="color:var(--text-dim);font-size:0.85rem;">{{ categories.paginator.count|default:categories|length }} total categories</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dashboard mb-0">
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Slug</th>
+                        <th>Description</th>
+                        <th>Blog Posts</th>
+                        <th>Order</th>
+                        <th style="width:150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-folder" style="color:var(--bg-primary);font-size:0.85rem;"></i>
+                                </div>
+                                <span style="font-weight:600;color:var(--text-white);">{{ category.name }}</span>
+                            </div>
+                        </td>
+                        <td style="color:var(--text-dim);font-size:0.85rem;">
+                            <code style="background:var(--bg-primary);padding:2px 6px;border-radius:4px;color:var(--accent);">{{ category.slug }}</code>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.85rem;max-width:260px;">
+                            {{ category.description|default:"—"|truncatewords:12 }}
+                        </td>
+                        <td>
+                            <a href="{% url 'dashboard:blog_list' %}?category={{ category.slug }}" class="badge" style="background:rgba(182,255,0,0.12);color:var(--accent);text-decoration:none;border:1px solid rgba(182,255,0,0.25);font-size:0.8rem;padding:4px 8px;border-radius:6px;" title="View posts in this category">
+                                <i class="fas fa-newspaper me-1"></i>{{ category.posts_count|default:0 }} post{{ category.posts_count|pluralize }}
+                            </a>
+                        </td>
+                        <td style="color:var(--text-dim);">{{ category.display_order }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'dashboard:blog_category_edit' pk=category.pk %}" class="btn btn-outline-accent btn-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'dashboard:blog_category_delete' pk=category.pk %}" class="btn btn-sm" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1px solid rgba(220,53,69,0.3);" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center" style="color:var(--text-dim);padding:3rem;">
+                            <i class="fas fa-folder-open" style="font-size:2rem;display:block;margin-bottom:0.5rem;color:var(--accent);opacity:0.4;"></i>
+                            No blog categories found.
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-accent" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                                    <i class="fas fa-plus me-1"></i> Create Your First Category
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if categories.has_other_pages %}
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <span style="color:var(--text-dim);font-size:0.85rem;">
+                Page {{ categories.number }} of {{ categories.paginator.num_pages }}
+            </span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if categories.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in categories.paginator.page_range %}
+                    {% if categories.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link" style="background:var(--accent);border-color:var(--accent);color:var(--bg-primary);">{{ num }}</span>
+                    </li>
+                    {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--text-muted);">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if categories.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ categories.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" style="background:var(--bg-primary);border-color:var(--border-color);color:var(--accent);">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% include 'dashboard/includes/blog_category_modal.html' %}
+{% endblock %}

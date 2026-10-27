@@ -20,7 +20,13 @@ class BlogCategory(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or 'category'
+            slug = base_slug
+            counter = 1
+            while BlogCategory.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -63,6 +69,8 @@ class BlogPost(models.Model):
     content = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     featured = models.BooleanField(default=False)
+    is_recent = models.BooleanField(default=False, verbose_name='Show in Recent Articles')
+    is_trending = models.BooleanField(default=False, verbose_name='Trending / Must Read')
     views_count = models.PositiveIntegerField(default=0)
     meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(blank=True)
@@ -86,13 +94,32 @@ class BlogPost(models.Model):
     def get_absolute_url(self):
         return reverse('blog:post_detail', kwargs={'slug': self.slug})
 
+    @property
+    def likes_count(self):
+        return self.likes.count()
+
+    @property
+    def approved_comments_count(self):
+        return self.comments.filter(is_approved=True).count()
+
+    def is_liked_by(self, request):
+        if not request:
+            return False
+        if request.user.is_authenticated:
+            return self.likes.filter(user=request.user).exists()
+        session_key = request.session.session_key
+        if session_key:
+            return self.likes.filter(session_key=session_key).exists()
+        return False
+
 
 class Comment(models.Model):
     post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='comments')
     name = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(blank=True, null=True)
     body = models.TextField()
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -102,3 +129,21 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.name} on {self.post.title}"
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name='blog_likes')
+    session_key = models.CharField(max_length=40, blank=True, null=True, db_index=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Post Like'
+        verbose_name_plural = 'Post Likes'
+
+    def __str__(self):
+        user_str = self.user.username if self.user else f"Guest ({self.session_key[:8] if self.session_key else 'anonymous'})"
+        return f"Like by {user_str} on {self.post.title}"
+

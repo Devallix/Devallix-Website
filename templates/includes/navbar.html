@@ -66,6 +66,9 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.app_name == 'graphic_design' %}active{% endif %}" href="{% url 'graphic_design:design_list' %}">Graphic Design</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.resolver_match.app_name == 'blog' %}active{% endif %}" href="{% url 'blog:post_list' %}">Blog</a>
+                </li>
             </ul>
 
             <div class="d-flex align-items-center gap-3 nav-actions">

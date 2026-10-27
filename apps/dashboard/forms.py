@@ -6,7 +6,7 @@ from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.graphic_design.models import GraphicDesignProject
 from apps.portfolio.models import Skill, SkillCategory
-from apps.blog.models import BlogPost
+from apps.blog.models import BlogPost, BlogCategory
 from apps.testimonials.models import Testimonial
 from apps.core.models import SiteSettings
 
@@ -275,7 +275,8 @@ class BlogPostForm(forms.ModelForm):
         model = BlogPost
         fields = [
             'title', 'category', 'tags', 'featured_image', 'excerpt',
-            'content', 'status', 'featured', 'meta_title', 'meta_description',
+            'content', 'status', 'featured', 'is_recent', 'is_trending',
+            'meta_title', 'meta_description',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -286,11 +287,15 @@ class BlogPostForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-select'}),
             'featured_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_recent': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_trending': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
         labels = {
             'featured': 'Featured post',
+            'is_recent': 'Show in Recent Articles (sidebar)',
+            'is_trending': 'Show in Trending / Must Read (sidebar)',
         }
 
     def __init__(self, *args, **kwargs):
@@ -301,17 +306,29 @@ class BlogPostForm(forms.ModelForm):
         self.helper.layout = Layout(
             'title',
             Row(
-                Column('category', css_class='col-md-6'),
-                Column('status', css_class='col-md-6'),
+                Column(
+                    'category',
+                    HTML('''
+                        <div class="mt-1 d-flex justify-content-end">
+                            <button type="button" class="btn btn-sm btn-outline-accent" data-bs-toggle="modal" data-bs-target="#createCategoryModal" style="font-size:0.75rem;padding:2px 8px;">
+                                <i class="fas fa-plus me-1"></i> New Category
+                            </button>
+                        </div>
+                    '''),
+                    css_class='col-md-6 mb-3'
+                ),
+                Column('status', css_class='col-md-6 mb-3'),
             ),
             'tags',
             'featured_image',
             'excerpt',
             'content',
             HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
-            HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-2"></i>Settings</h6>'),
+            HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-2"></i>Display Settings</h6>'),
             Row(
-                Column('featured', css_class='col-auto'),
+                Column('featured', css_class='col-md-4'),
+                Column('is_recent', css_class='col-md-4'),
+                Column('is_trending', css_class='col-md-4'),
             ),
             HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
             HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-search me-2"></i>SEO</h6>'),
@@ -319,6 +336,30 @@ class BlogPostForm(forms.ModelForm):
             'meta_description',
             ButtonHolder(
                 Submit('submit', 'Save Post', css_class='btn btn-accent mt-3')
+            ),
+        )
+
+
+class BlogCategoryForm(DisplayOrderMixin, forms.ModelForm):
+    class Meta:
+        model = BlogCategory
+        fields = ['name', 'description', 'display_order']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Artificial Intelligence, Tutorials'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional description of this category...'}),
+            'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            'name',
+            'description',
+            'display_order',
+            ButtonHolder(
+                Submit('submit', 'Save Category', css_class='btn btn-accent mt-3')
             ),
         )
 

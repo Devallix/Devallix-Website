@@ -2,6 +2,119 @@
 {% load crispy_forms_tags %}
 {% block title %}{% if form.instance.pk %}Edit Post{% else %}New Post{% endif %}{% endblock %}
 
+{% block extra_css %}
+<!-- Quill Snow theme -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<style>
+/* ── Quill Editor Container ─────────────────────────────────── */
+#quill-editor-wrapper {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    overflow: hidden;
+}
+#quill-editor {
+    min-height: 380px;
+    max-height: 680px;
+    overflow-y: auto;
+    background: var(--bg-primary);
+    color: var(--text-white);
+    font-size: 1rem;
+    line-height: 1.7;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.ql-toolbar.ql-snow {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+.ql-toolbar.ql-snow .ql-formats {
+    margin-right: 8px;
+}
+/* Toolbar icon colours */
+.ql-toolbar .ql-stroke { stroke: var(--text-dim); }
+.ql-toolbar .ql-fill   { fill:   var(--text-dim); }
+.ql-toolbar .ql-picker-label { color: var(--text-dim); }
+/* Hover / active */
+.ql-toolbar button:hover .ql-stroke,
+.ql-toolbar button.ql-active .ql-stroke { stroke: var(--accent); }
+.ql-toolbar button:hover .ql-fill,
+.ql-toolbar button.ql-active .ql-fill   { fill:   var(--accent); }
+.ql-toolbar button:hover,
+.ql-toolbar button.ql-active            { color:  var(--accent); }
+.ql-toolbar .ql-picker-label:hover,
+.ql-toolbar .ql-picker-item:hover       { color:  var(--accent); }
+/* Dropdown */
+.ql-picker-options {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 4px 0 !important;
+    z-index: 9999 !important;
+}
+.ql-picker-item { color: var(--text-dim) !important; padding: 4px 10px !important; }
+.ql-picker-item:hover,
+.ql-picker-item.ql-selected { color: var(--accent) !important; }
+/* Quill content styles inside editor */
+.ql-editor h1 { font-size: 1.9rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--text-white); }
+.ql-editor h2 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--text-white); }
+.ql-editor h3 { font-size: 1.2rem; font-weight: 600; margin: 0.8rem 0 0.4rem; color: var(--text-white); }
+.ql-editor p  { margin-bottom: 0.8rem; color: var(--text-muted); }
+.ql-editor blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 8px 16px;
+    margin: 1rem 0;
+    background: rgba(182, 255, 0, 0.05);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--text-muted);
+    font-style: italic;
+}
+.ql-editor pre.ql-syntax {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #a6e22e;
+    overflow-x: auto;
+}
+.ql-editor ul, .ql-editor ol {
+    padding-left: 1.5em;
+    margin-bottom: 0.8rem;
+    color: var(--text-muted);
+}
+.ql-editor a { color: var(--accent); }
+/* Label + helper row above toolbar */
+.quill-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.quill-badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: rgba(182,255,0,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(182,255,0,0.2);
+    font-weight: 500;
+}
+/* Character counter */
+#quill-char-count {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-section">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -13,13 +126,112 @@
                 {% if form.instance.pk %}Edit {{ form.instance.title|truncatewords:5 }}{% else %}Create New{% endif %}
             </p>
         </div>
-        <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent">
-            <i class="fas fa-arrow-left me-1"></i> Back to List
-        </a>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-accent" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                <i class="fas fa-folder-plus me-1"></i> New Category
+            </button>
+            <a href="{% url 'dashboard:blog_list' %}" class="btn btn-outline-accent">
+                <i class="fas fa-arrow-left me-1"></i> Back to List
+            </a>
+        </div>
     </div>
 
     <div class="form-dashboard">
         {% crispy form form.helper %}
     </div>
 </div>
+
+{% include 'dashboard/includes/blog_category_modal.html' %}
+{% endblock %}
+
+{% block page_js %}
+<!-- Quill.js library -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ── 1. Locate the original Django textarea for the content field ───
+    const contentTextarea = document.getElementById('id_content');
+    if (!contentTextarea) return;
+
+    // ── 2. Hide the original textarea (we'll sync it on submit) ───────
+    contentTextarea.style.display = 'none';
+
+    // ── 3. Inject Quill wrapper BEFORE the hidden textarea ────────────
+    const wrapperDiv = document.createElement('div');
+    wrapperDiv.id = 'quill-editor-wrapper';
+    contentTextarea.parentNode.insertBefore(wrapperDiv, contentTextarea);
+
+    // Label row
+    const labelRow = document.createElement('div');
+    labelRow.className = 'quill-label-row';
+    labelRow.innerHTML = `
+        <label class="form-label mb-0" style="font-weight:600;font-size:0.9rem;color:var(--text-white);">
+            Content <span style="color:var(--accent-primary);">*</span>
+        </label>
+        <span class="quill-badge"><i class="fas fa-pen-nib me-1"></i>Rich Text Editor</span>
+    `;
+    wrapperDiv.appendChild(labelRow);
+
+    // Actual Quill mount point
+    const editorDiv = document.createElement('div');
+    editorDiv.id = 'quill-editor';
+    wrapperDiv.appendChild(editorDiv);
+
+    // Char counter
+    const charCounter = document.createElement('div');
+    charCounter.id = 'quill-char-count';
+    charCounter.textContent = '0 characters';
+    wrapperDiv.appendChild(charCounter);
+
+    // ── 4. Initialise Quill ───────────────────────────────────────────
+    const quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Start writing your article here\u2026 Use the toolbar above to add headings, bold text, lists, code blocks, and more.',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'align': [] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link', 'image'],
+                ['clean']
+            ]
+        }
+    });
+
+    // ── 5. Pre-populate editor with existing content ──────────────────
+    const existingContent = contentTextarea.value.trim();
+    if (existingContent) {
+        if (existingContent.startsWith('<') && existingContent.includes('>')) {
+            // Likely HTML saved by Quill previously
+            quill.clipboard.dangerouslyPasteHTML(existingContent);
+        } else {
+            // Legacy plain text -- wrap paragraphs then import
+            const wrapped = existingContent
+                .split(/\n{2,}/)
+                .map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>')
+                .join('');
+            quill.clipboard.dangerouslyPasteHTML(wrapped);
+        }
+    }
+
+    // ── 6. Char counter update ────────────────────────────────────────
+    function updateCounter() {
+        const len = quill.getText().trim().length;
+        charCounter.textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+    }
+    quill.on('text-change', updateCounter);
+    updateCounter();
+
+    // ── 7. Sync Quill HTML to hidden textarea on form submit ──────────
+    const form = contentTextarea.closest('form');
+    if (form) {
+        form.addEventListener('submit', function () {
+            contentTextarea.value = quill.getSemanticHTML();
+        });
+    }
+});
+</script>
 {% endblock %}

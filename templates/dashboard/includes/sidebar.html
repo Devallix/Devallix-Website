@@ -44,8 +44,14 @@
         <a href="{% url 'dashboard:skill_list' %}" class="nav-link {% if 'skill' in request.resolver_match.url_name %}active{% endif %}">
             <i class="fas fa-code"></i> Skills
         </a>
-        <a href="{% url 'dashboard:blog_list' %}" class="nav-link {% if 'blog' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'dashboard:blog_list' %}" class="nav-link {% if 'blog' in request.resolver_match.url_name and 'comment' not in request.resolver_match.url_name %}active{% endif %}">
             <i class="fas fa-blog"></i> Blog Posts
+        </a>
+        <a href="{% url 'dashboard:comment_list' %}" class="nav-link {% if 'comment' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fas fa-comments"></i> Comments
+            {% if pending_comments %}
+            <span class="badge">{{ pending_comments }}</span>
+            {% endif %}
         </a>
 
         <div class="nav-section">
