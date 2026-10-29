@@ -2,6 +2,9 @@
 {% load humanize %}
 {% block title %}{{ post.title }} - Blog - {{ block.super }}{% endblock %}
 {% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% block meta_keywords %}{{ post.meta_keywords|default:site_settings.meta_keywords|default:'developer, portfolio, software, applications' }}{% endblock %}
+{% block og_title %}{{ post.meta_og_title|default:post.meta_title|default:post.title }}{% endblock %}
+{% block og_description %}{{ post.meta_og_description|default:post.meta_description|default:post.excerpt }}{% endblock %}
 
 {% block extra_css %}
 <style>

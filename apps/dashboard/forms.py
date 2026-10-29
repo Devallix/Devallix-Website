@@ -276,7 +276,8 @@ class BlogPostForm(forms.ModelForm):
         fields = [
             'title', 'category', 'tags', 'featured_image', 'excerpt',
             'content', 'status', 'featured', 'is_recent', 'is_trending',
-            'meta_title', 'meta_description',
+            'meta_title', 'meta_description', 'meta_keywords',
+            'meta_og_title', 'meta_og_description',
         ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
@@ -291,11 +292,24 @@ class BlogPostForm(forms.ModelForm):
             'is_trending': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'meta_keywords': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'meta_og_title': forms.TextInput(attrs={'class': 'form-control'}),
+            'meta_og_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
         labels = {
             'featured': 'Featured post',
             'is_recent': 'Show in Recent Articles (sidebar)',
             'is_trending': 'Show in Trending / Must Read (sidebar)',
+            'meta_keywords': 'Meta keywords',
+            'meta_og_title': 'Meta OG title',
+            'meta_og_description': 'Meta OG description',
+        }
+        help_texts = {
+            'meta_title': 'Used for the page title tag and search engine results.',
+            'meta_description': 'Used for the meta description tag.',
+            'meta_keywords': 'Comma-separated keywords, e.g. AI, business, technology.',
+            'meta_og_title': 'Used for the og:title tag when shared on social media. Falls back to the meta title.',
+            'meta_og_description': 'Used for the og:description tag when shared on social media. Falls back to the meta description.',
         }
 
     def __init__(self, *args, **kwargs):
@@ -334,6 +348,9 @@ class BlogPostForm(forms.ModelForm):
             HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-search me-2"></i>SEO</h6>'),
             'meta_title',
             'meta_description',
+            'meta_keywords',
+            'meta_og_title',
+            'meta_og_description',
             ButtonHolder(
                 Submit('submit', 'Save Post', css_class='btn btn-accent mt-3')
             ),

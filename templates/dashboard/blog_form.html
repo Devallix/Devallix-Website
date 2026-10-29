@@ -153,8 +153,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const contentTextarea = document.getElementById('id_content');
     if (!contentTextarea) return;
 
-    // ── 2. Hide the original textarea (we'll sync it on submit) ───────
+    // If the editor library failed to load (offline / CDN blocked), leave the
+    // plain textarea visible and usable instead of hiding an empty field.
+    if (typeof Quill === 'undefined') {
+        console.warn('Quill failed to load - falling back to the plain textarea.');
+        return;
+    }
+
+    // ── 2. Hide the original textarea (we'll sync it from Quill) ──────
     contentTextarea.style.display = 'none';
+    // Native validation runs before the submit event, so a `required` hidden
+    // textarea would block the submit before Quill's HTML is copied in and the
+    // Save button would appear to do nothing. Django still validates the field
+    // server-side, and the synced value below keeps it accurate.
+    contentTextarea.removeAttribute('required');
 
     // ── 3. Inject Quill wrapper BEFORE the hidden textarea ────────────
     const wrapperDiv = document.createElement('div');
@@ -225,12 +237,17 @@ document.addEventListener('DOMContentLoaded', function () {
     quill.on('text-change', updateCounter);
     updateCounter();
 
-    // ── 7. Sync Quill HTML to hidden textarea on form submit ──────────
+    // ── 7. Keep the hidden textarea in sync with Quill ────────────────
+    function syncContent() {
+        // An untouched editor reports a length of 1 (the trailing newline).
+        contentTextarea.value = quill.getLength() > 1 ? quill.getSemanticHTML() : '';
+    }
+    quill.on('text-change', syncContent);
+    syncContent();
+
     const form = contentTextarea.closest('form');
     if (form) {
-        form.addEventListener('submit', function () {
-            contentTextarea.value = quill.getSemanticHTML();
-        });
+        form.addEventListener('submit', syncContent);
     }
 });
 </script>

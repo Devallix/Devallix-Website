@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, HttpResponse
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
 
@@ -53,6 +53,61 @@ def favicon(request):
         return FileResponse(open(collected, 'rb'), content_type='image/x-icon')
 
     raise Http404('Favicon not found')
+
+
+ROBOTS_TXT = f"""\
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /accounts/login/
+Disallow: /accounts/logout/
+Disallow: /accounts/profile/
+Disallow: /accounts/password-change/
+Disallow: /accounts/password-reset/
+Disallow: /accounts/password-reset-confirm/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /accounts/login/
+Disallow: /accounts/logout/
+Disallow: /accounts/profile/
+Disallow: /accounts/password-change/
+Disallow: /accounts/password-reset/
+Disallow: /accounts/password-reset-confirm/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /accounts/login/
+Disallow: /accounts/logout/
+Disallow: /accounts/profile/
+Disallow: /accounts/password-change/
+Disallow: /accounts/password-reset/
+Disallow: /accounts/password-reset-confirm/
+
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /accounts/login/
+Disallow: /accounts/logout/
+Disallow: /accounts/profile/
+Disallow: /accounts/password-change/
+Disallow: /accounts/password-reset/
+Disallow: /accounts/password-reset-confirm/
+
+Sitemap: https://{settings.SITE_DOMAIN}/sitemap.xml
+"""
+
+
+@cache_control(public=True, max_age=60 * 60 * 24)
+def robots_txt(request):
+    """Serve /robots.txt from the site root."""
+    return HttpResponse(ROBOTS_TXT, content_type='text/plain; charset=utf-8')
 
 
 class HomeView(TemplateView):
