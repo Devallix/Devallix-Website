@@ -105,6 +105,7 @@ class AppUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateView
 class AppDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = DesktopApplication
     template_name = 'dashboard/app_confirm_delete.html'
+    context_object_name = 'application'
     success_url = reverse_lazy('dashboard:app_list')
     success_message = 'Application deleted successfully.'
 
@@ -199,6 +200,7 @@ class ProjectUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Update
 class ProjectDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = WebProject
     template_name = 'dashboard/project_confirm_delete.html'
+    context_object_name = 'project'
     success_url = reverse_lazy('dashboard:project_list')
     success_message = 'Project deleted successfully.'
 
@@ -241,6 +243,7 @@ class MobileAppUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Upda
 class MobileAppDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = MobileApp
     template_name = 'dashboard/mobile_app_confirm_delete.html'
+    context_object_name = 'mobileapp'
     success_url = reverse_lazy('dashboard:mobile_app_list')
     success_message = 'Mobile app deleted successfully.'
 
@@ -283,6 +286,7 @@ class DesignUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateV
 class DesignDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = GraphicDesignProject
     template_name = 'dashboard/design_confirm_delete.html'
+    context_object_name = 'graphicdesignproject'
     success_url = reverse_lazy('dashboard:design_list')
     success_message = 'Graphic design project deleted successfully.'
 
@@ -313,6 +317,7 @@ class SkillUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateVi
 class SkillDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = Skill
     template_name = 'dashboard/skill_confirm_delete.html'
+    context_object_name = 'skill'
     success_url = reverse_lazy('dashboard:skill_list')
     success_message = 'Skill deleted successfully.'
 
@@ -371,6 +376,7 @@ class BlogPostUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Updat
 class BlogPostDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = BlogPost
     template_name = 'dashboard/blog_confirm_delete.html'
+    context_object_name = 'post'
     success_url = reverse_lazy('dashboard:blog_list')
     success_message = 'Blog post deleted successfully.'
 
@@ -503,6 +509,7 @@ class TestimonialUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Up
 class TestimonialDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = Testimonial
     template_name = 'dashboard/testimonial_confirm_delete.html'
+    context_object_name = 'testimonial'
     success_url = reverse_lazy('dashboard:testimonial_list')
     success_message = 'Testimonial deleted successfully.'
 
@@ -552,6 +559,7 @@ class CategoryUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Updat
 class CategoryDeleteView(DashboardLoginRequiredMixin, DeleteView):
     model = ApplicationCategory
     template_name = 'dashboard/category_confirm_delete.html'
+    context_object_name = 'category'
     success_url = reverse_lazy('dashboard:category_list')
     success_message = 'Category deleted successfully.'
 
