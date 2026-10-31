@@ -6,8 +6,6 @@ from django.core.mail import EmailMessage
 from django.shortcuts import redirect
 from django.views.generic import FormView, TemplateView
 
-from apps.core.models import SiteSettings
-
 from .forms import ContactForm
 from .models import ContactMessage
 
@@ -46,8 +44,7 @@ class ContactView(FormView):
         Returns True when the notification was sent, False otherwise. The
         message is always stored in the dashboard inbox regardless.
         """
-        site = SiteSettings.load()
-        recipient = site.email or settings.DEFAULT_FROM_EMAIL
+        recipient = settings.DEFAULT_FROM_EMAIL
         if not recipient:
             logger.error(
                 'Contact notification not sent: configure an email in Site Settings '
