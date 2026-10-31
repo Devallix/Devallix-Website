@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const typedEl = document.getElementById('typed-output');
-    if (typedEl) {
+    if (typedEl && window.innerWidth >= 768) {
         const texts = JSON.parse(typedEl.getAttribute('data-texts') || '[]');
         if (texts.length > 0) {
             let textIndex = 0;

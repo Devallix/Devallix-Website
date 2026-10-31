@@ -149,6 +149,88 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 1;
 }
 
+/* Keep decorative icons inside cards centered on small screens */
+@media (max-width: 767.98px) {
+    .card-custom > .service-icon,
+    .card-custom > .about-pillar-icon,
+    .card-custom > .card-icon,
+    .card-custom > .icon-box {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .card-custom > .card-head {
+        flex-direction: column;
+        align-items: center !important;
+        text-align: center;
+    }
+}
+
+/* ── Desktop App Safety Badge ───────────────────────────────── */
+.app-safe-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 3;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    text-align: center;
+    background: linear-gradient(140deg, #25c268 0%, #128a4b 100%);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 16px rgba(18, 138, 75, 0.45);
+    cursor: help;
+}
+
+.app-safe-badge i {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.app-safe-badge .app-safe-badge-title {
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.15;
+}
+
+.app-safe-badge .app-safe-badge-sub {
+    font-size: 0.4rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    line-height: 1.1;
+    opacity: 0.95;
+}
+
+@media (max-width: 575.98px) {
+    .app-safe-badge {
+        width: 62px;
+        height: 62px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .app-safe-badge i {
+        font-size: 0.9rem;
+    }
+
+    .app-safe-badge .app-safe-badge-title {
+        font-size: 0.46rem;
+    }
+
+    .app-safe-badge .app-safe-badge-sub {
+        font-size: 0.35rem;
+    }
+}
+
 .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
@@ -731,6 +813,12 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes cursorBlink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
+}
+
+@media (max-width: 767.98px) {
+    .typing-cursor {
+        display: none !important;
+    }
 }
 
 /* Hero Visual Card */

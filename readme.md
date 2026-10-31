@@ -36,7 +36,9 @@ All content is database-driven. Uploaded images and resumes live under
 - **About** - profile image, "Who I Am", Mission, Vision, and Development
   Philosophy.
 - **Skills** - grouped by category with proficiency values.
-- **Portfolio hub** - entry point to every content vertical.
+- **Portfolio hub** - live project counts, a "Selected Work" card grid
+  pulling recent desktop, web, mobile, and graphic design items, and
+  category cards linking to every content vertical.
 - **Desktop apps** - search, category/platform filters, sorting, pagination,
   detail pages with screenshots, versions, requirements, FAQs, related apps,
   and tracked downloads.
@@ -261,9 +263,12 @@ files on GitHub Releases, S3, Dropbox, or a similar service.
 ### Contact messages
 
 Submissions are validated, saved as `ContactMessage` with a `unread` status and
-the sender's IP address, then shown with a success message. Staff read, mark
-replied, archive, or delete them from `/dashboard/messages/`. No email is sent
-automatically.
+the sender's IP address, and emailed to the address configured in Site Settings
+(falling back to `DEFAULT_FROM_EMAIL`). The sender's address is set as the
+`Reply-To`, so replying goes straight back to them. If SMTP delivery fails the
+message is still stored and the visitor sees a warning instead of a false
+success message. Staff read, mark replied, archive, or delete messages from
+`/dashboard/messages/`.
 
 ### Newsletter
 
@@ -373,11 +378,10 @@ These are verified and documented rather than hidden:
    not exist, so that filter does not work.
 4. Public registration is not exposed (view/form exist, but no URL or template).
 5. Blog comments render when approved, but there is no submission endpoint.
-6. The contact form stores messages but does not send an email notification.
-7. No `admin.py` modules exist under `apps/`, so `/admin/` exposes no content
+6. No `admin.py` modules exist under `apps/`, so `/admin/` exposes no content
    models; use the custom dashboard.
-8. `tests.py` files are Django stubs; there is no automated test suite.
-9. Local `media/` storage needs replacement on ephemeral hosting.
+7. `tests.py` files are Django stubs; there is no automated test suite.
+8. Local `media/` storage needs replacement on ephemeral hosting.
 
 See [plan.md](plan.md) for the full list and the roadmap.
 
@@ -400,6 +404,20 @@ in the shell.
 **Password-reset email does not arrive locally.**
 That is expected: `DEBUG=True` uses the console email backend. Check the
 terminal output.
+
+**Email fails in production with Gmail (`535-5.7.8 Username and Password not accepted`).**
+Gmail no longer accepts your normal account password over SMTP. Enable 2-Step
+Verification on the Google account, create an App Password at
+<https://myaccount.google.com/apppasswords>, and set
+`EMAIL_HOST_PASSWORD` to that 16-character password. Do not wrap the value in
+quotes in a hosting dashboard (decouple only strips quotes found in `.env`
+files). Use `EMAIL_PORT=587` with `EMAIL_USE_TLS=True`, or `465` with
+`EMAIL_USE_SSL=True` — never both. Redeploy after changing environment
+variables, then verify with:
+
+```bash
+python manage.py sendtestemail you@example.com
+```
 
 **Database seems empty after deploy.**
 SQLite paths are normalized to absolute paths; make sure the deployed working

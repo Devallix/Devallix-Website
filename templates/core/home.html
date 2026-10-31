@@ -22,7 +22,7 @@
                 </div>
                 <h1 class="hero-title">
                     Hi, <span class="gradient-text">Devallix</span> here!<br>
-                     <span class="gradient-text" id="typed-output" data-texts='["Transforming ideas into innovative digital solutions.","Building digital experiences.","Lets build something beautiful together.","If you can think it, I can build it."]'></span><span class="typing-cursor"></span>
+                     <span class="gradient-text" id="typed-output" data-texts='["Transforming ideas into innovative digital solutions.","Building digital experiences.","Lets build something beautiful together.","If you can think it, I can build it."]'>Transforming ideas into innovative digital solutions.</span><span class="typing-cursor"></span>
                 </h1>
                 <p class="hero-subtitle">
                     I design and engineer custom desktop apps, mobile experiences, and modern web applications from the ground up. Explore my work, test-drive my tools, or hire me to bring your next big idea to life.
@@ -213,7 +213,8 @@
             {% for app in featured_apps %}
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:1|divisibleby:3|yesno:'100,200,300' }}">
                 <div class="card-custom h-100 hover-lift">
-                    <div class="d-flex align-items-center gap-3 mb-3">
+                    {% include 'includes/app_safe_badge.html' %}
+                    <div class="d-flex align-items-center gap-3 mb-3" style="padding-right:64px;">
                         {% if app.logo %}
                         <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;">
                         {% else %}

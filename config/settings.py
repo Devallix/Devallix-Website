@@ -148,8 +148,9 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
 
-DEFAULT_FROM_EMAIL = config(
-    'DEFAULT_FROM_EMAIL',
-    default=EMAIL_HOST_USER or 'noreply@devportfolio.com',
+DEFAULT_FROM_EMAIL = (
+    config('DEFAULT_FROM_EMAIL', default='')
+    or EMAIL_HOST_USER
+    or 'noreply@devportfolio.com'
 )
 SERVER_EMAIL = DEFAULT_FROM_EMAIL

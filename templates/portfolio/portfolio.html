@@ -1,5 +1,302 @@
 {% extends 'base.html' %}
 {% block title %}Portfolio - {{ block.super }}{% endblock %}
+{% block meta_description %}Explore my portfolio of desktop applications, web platforms, mobile apps and graphic design work.{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Portfolio page ─────────────────────────────────────── */
+    .pf-stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.65rem;
+        margin-top: 1.75rem;
+    }
+
+    .pf-stat {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .pf-stat strong {
+        color: var(--accent-primary);
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    /* Work cards */
+    .pf-work-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: inherit;
+        transition: var(--transition);
+    }
+
+    .pf-work-card:hover {
+        color: inherit;
+        border-color: rgba(182, 255, 0, 0.35);
+        box-shadow: 0 22px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(182, 255, 0, 0.08);
+    }
+
+    .pf-work-media {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        background: var(--bg-secondary);
+    }
+
+    .pf-work-media img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pf-work-card:hover .pf-work-media img {
+        transform: scale(1.06);
+    }
+
+    .pf-work-fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--pf-accent, var(--accent-primary));
+        background:
+            radial-gradient(circle at 30% 20%, var(--pf-accent-soft, rgba(182, 255, 0, 0.18)), transparent 60%),
+            linear-gradient(135deg, var(--bg-card), var(--bg-primary));
+    }
+
+    .pf-work-media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 55%, rgba(15, 17, 21, 0.55));
+        pointer-events: none;
+    }
+
+    .pf-pill {
+        position: absolute;
+        top: 0.9rem;
+        left: 0.9rem;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(15, 17, 21, 0.65);
+        backdrop-filter: blur(8px);
+        color: var(--pf-accent, var(--accent-primary));
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+    }
+
+    .pf-work-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 1.5rem;
+    }
+
+    .pf-work-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .pf-work-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin: 0 0 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .pf-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .pf-chip {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 217, 255, 0.2);
+        background: rgba(0, 217, 255, 0.08);
+        color: var(--accent-secondary);
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .pf-work-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: auto;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-dim);
+        font-size: 0.78rem;
+    }
+
+    .pf-work-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--accent-primary);
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .pf-work-link i {
+        transition: transform 0.25s ease;
+    }
+
+    .pf-work-card:hover .pf-work-link i {
+        transform: translateX(4px);
+    }
+
+    /* Category cards */
+    .pf-cat-card {
+        position: relative;
+        display: block;
+        height: 100%;
+        padding: 2rem;
+        overflow: hidden;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-color);
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.01));
+        color: inherit;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .pf-cat-card::before {
+        content: '';
+        position: absolute;
+        top: -90px;
+        right: -90px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--pf-accent), transparent 70%);
+        opacity: 0.16;
+        filter: blur(6px);
+        transition: var(--transition);
+        pointer-events: none;
+    }
+
+    .pf-cat-card:hover {
+        color: inherit;
+        transform: translateY(-6px);
+        border-color: var(--pf-accent);
+        box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .pf-cat-card:hover::before {
+        opacity: 0.32;
+        transform: scale(1.15);
+    }
+
+    .pf-cat-desktop { --pf-accent: #B6FF00; --pf-accent-soft: rgba(182, 255, 0, 0.12); }
+    .pf-cat-web { --pf-accent: #00D9FF; --pf-accent-soft: rgba(0, 217, 255, 0.12); }
+    .pf-cat-mobile { --pf-accent: #B98BFF; --pf-accent-soft: rgba(185, 139, 255, 0.12); }
+    .pf-cat-design { --pf-accent: #FF8A8A; --pf-accent-soft: rgba(255, 138, 138, 0.12); }
+
+    .pf-cat-icon {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 1.35rem;
+        border-radius: 15px;
+        background: var(--pf-accent-soft);
+        color: var(--pf-accent);
+        font-size: 1.3rem;
+    }
+
+    .pf-cat-card h3 {
+        position: relative;
+        z-index: 1;
+        font-size: 1.15rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .pf-cat-card p {
+        position: relative;
+        z-index: 1;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1.4rem;
+    }
+
+    .pf-cat-link {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--pf-accent);
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .pf-cat-link i {
+        transition: transform 0.25s ease;
+    }
+
+    .pf-cat-card:hover .pf-cat-link i {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 575.98px) {
+        .pf-cat-card {
+            padding: 1.6rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pf-work-card,
+        .pf-work-media img,
+        .pf-cat-card,
+        .pf-work-link i,
+        .pf-cat-link i {
+            transition: none;
+        }
+
+        .pf-cat-card:hover {
+            transform: none;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">
@@ -8,70 +305,131 @@
                 <span class="badge-custom mb-3"><i class="fas fa-layer-group me-1"></i> Portfolio</span>
                 <h1 class="section-title">My <span class="accent">Portfolio</span></h1>
                 <div class="divider divider-center"></div>
-                <p class="section-subtitle">A showcase of my desktop apps, web apps, mobile apps, and graphic design work.</p>
+                <p class="section-subtitle mb-0">A showcase of my desktop apps, web apps, mobile apps, and graphic design work.</p>
+                <div class="pf-stats">
+                    {% if counts.desktop %}
+                    <span class="pf-stat"><strong>{{ counts.desktop }}</strong> Desktop App{{ counts.desktop|pluralize }}</span>
+                    {% endif %}
+                    {% if counts.web %}
+                    <span class="pf-stat"><strong>{{ counts.web }}</strong> Web Project{{ counts.web|pluralize }}</span>
+                    {% endif %}
+                    {% if counts.mobile %}
+                    <span class="pf-stat"><strong>{{ counts.mobile }}</strong> Mobile App{{ counts.mobile|pluralize }}</span>
+                    {% endif %}
+                    {% if counts.design %}
+                    <span class="pf-stat"><strong>{{ counts.design }}</strong> Design{{ counts.design|pluralize }}</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
+<!-- 
+{% if featured_items %}
+<section class="section-padding" style="padding-bottom:0;">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-star me-1"></i> Selected Work</span>
+            <h2 class="section-title">Recent <span class="accent">Builds</span></h2>
+            <div class="divider divider-center"></div>
+            <p class="section-subtitle">A few highlights across desktop, web, mobile, and design.</p>
+        </div>
+
+        <div class="row g-4">
+            {% for item in featured_items %}
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
+                <a href="{{ item.url }}" class="pf-work-card hover-lift" style="--pf-accent: {{ item.accent }}; --pf-accent-soft: {{ item.accent_soft }};">
+                    <div class="pf-work-media">
+                        <span class="pf-pill"><i class="{{ item.icon }}"></i> {{ item.type_label }}</span>
+                        {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" loading="lazy">
+                        {% else %}
+                        <div class="pf-work-fallback"><i class="{{ item.icon }}"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="pf-work-body">
+                        <h3 class="pf-work-title">{{ item.title }}</h3>
+                        <p class="pf-work-desc">{{ item.description }}</p>
+                        {% if item.techs %}
+                        <div class="pf-chips">
+                            {% for tech in item.techs %}
+                            <span class="pf-chip">{{ tech }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="pf-work-footer">
+                            <span>{{ item.meta }}</span>
+                            <span class="pf-work-link">View <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %} -->
 
 <section class="section-padding">
     <div class="container">
-        <!-- Desktop Apps -->
-        <div class="mb-5" data-aos="fade-up">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width:50px;height:50px;border-radius:12px;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-desktop" style="font-size:1.3rem;color:var(--accent-primary);"></i>
-                </div>
-                <h3 class="fw-bold mb-0">Desktop <span class="accent">Apps</span></h3>
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-custom mb-3"><i class="fas fa-compass me-1"></i> Categories</span>
+            <h2 class="section-title">Explore by <span class="accent">Category</span></h2>
+            <div class="divider divider-center"></div>
+            <p class="section-subtitle">Jump straight into the area you are interested in.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6" data-aos="fade-up">
+                <a href="{% url 'desktop_apps:app_list' %}" class="pf-cat-card pf-cat-desktop">
+                    <div class="pf-cat-icon"><i class="fas fa-desktop"></i></div>
+                    <h3>Desktop Apps</h3>
+                    <p>Native and cross-platform tools built with Python and PySide6 — fast, secure, and ready offline.</p>
+                    <span class="pf-cat-link">Browse desktop apps <i class="fas fa-arrow-right"></i></span>
+                </a>
             </div>
-            <div class="text-center mb-4">
-                <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom">
-                    <i class="fas fa-arrow-right"></i> View All Desktop Apps
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <a href="{% url 'web_projects:project_list' %}" class="pf-cat-card pf-cat-web">
+                    <div class="pf-cat-icon"><i class="fas fa-globe"></i></div>
+                    <h3>Web Apps</h3>
+                    <p>Full-stack platforms for schools, hospitals, hotels, inventory, POS, and more.</p>
+                    <span class="pf-cat-link">Browse web apps <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <a href="{% url 'mobile_apps:app_list' %}" class="pf-cat-card pf-cat-mobile">
+                    <div class="pf-cat-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Mobile Apps</h3>
+                    <p>Android, iOS, and cross-platform apps that put your services in your customers' hands.</p>
+                    <span class="pf-cat-link">Browse mobile apps <i class="fas fa-arrow-right"></i></span>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <a href="{% url 'graphic_design:design_list' %}" class="pf-cat-card pf-cat-design">
+                    <div class="pf-cat-icon"><i class="fas fa-palette"></i></div>
+                    <h3>Graphic Design</h3>
+                    <p>Logos, flyers, business cards, and brand identity assets that make you recognisable.</p>
+                    <span class="pf-cat-link">Browse designs <i class="fas fa-arrow-right"></i></span>
                 </a>
             </div>
         </div>
+    </div>
+</section>
 
-        <!-- Web Apps -->
-        <div class="mb-5" data-aos="fade-up" data-aos-delay="100">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width:50px;height:50px;border-radius:12px;background:rgba(0,217,255,0.1);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-globe" style="font-size:1.3rem;color:var(--accent-secondary);"></i>
-                </div>
-                <h3 class="fw-bold mb-0">Web <span class="text-accent-secondary">Apps</span></h3>
-            </div>
-            <div class="text-center mb-4">
-                <a href="{% url 'web_projects:project_list' %}" class="btn btn-secondary-custom">
-                    <i class="fas fa-arrow-right"></i> View All Web Apps
+<section class="section-padding" style="padding-top:0;">
+    <div class="container">
+        <div class="cta-section text-center" data-aos="fade-up">
+            <h2 class="section-title mb-3" style="font-size:2.2rem;">Have a Project in <span class="accent">Mind?</span></h2>
+            <p class="section-subtitle mx-auto mb-0">From management systems to brand identities — let's build something that works as good as it looks.</p>
+            <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                <a href="{% url 'contact:contact' %}" class="btn btn-primary-custom btn-lg">
+                    <i class="fas fa-calendar-check"></i> Book me for your next project
                 </a>
-            </div>
-        </div>
-
-        <!-- Mobile Apps -->
-        <div class="mb-5" data-aos="fade-up" data-aos-delay="200">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width:50px;height:50px;border-radius:12px;background:rgba(155,89,255,0.12);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-mobile-alt" style="font-size:1.3rem;color:#b98bff;"></i>
-                </div>
-                <h3 class="fw-bold mb-0">Mobile <span style="color:#b98bff;">Apps</span></h3>
-            </div>
-            <div class="text-center mb-4">
-                <a href="{% url 'mobile_apps:app_list' %}" class="btn btn-outline-custom">
-                    <i class="fas fa-arrow-right"></i> View All Mobile Apps
-                </a>
-            </div>
-        </div>
-
-        <!-- Graphic Design -->
-        <div class="mb-5" data-aos="fade-up" data-aos-delay="300">
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width:50px;height:50px;border-radius:12px;background:rgba(255,107,107,0.12);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-palette" style="font-size:1.3rem;color:#ff8a8a;"></i>
-                </div>
-                <h3 class="fw-bold mb-0">Graphic <span style="color:#ff8a8a;">Design</span></h3>
-            </div>
-            <div class="text-center mb-4">
-                <a href="{% url 'graphic_design:design_list' %}" class="btn btn-outline-custom">
-                    <i class="fas fa-arrow-right"></i> View Graphic Design
+                <a href="{% url 'desktop_apps:app_list' %}" class="btn btn-outline-custom btn-lg">
+                    <i class="fas fa-download"></i> Download Apps
                 </a>
             </div>
         </div>
