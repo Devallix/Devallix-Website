@@ -95,7 +95,9 @@ class BlogPost(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('blog:post_detail', kwargs={'slug': self.slug})
+        if self.category:
+            return reverse('blog:post_detail', kwargs={'category_slug': self.category.slug, 'slug': self.slug})
+        return reverse('blog:post_detail_plain', kwargs={'slug': self.slug})
 
     @property
     def likes_count(self):

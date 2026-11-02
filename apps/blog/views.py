@@ -63,15 +63,23 @@ class BlogPostDetailView(DetailView):
         return context
 
     def get_object(self, queryset=None):
-        obj = super().get_object(queryset)
+        queryset = queryset or self.get_queryset()
+        slug = self.kwargs.get('slug')
+        category_slug = self.kwargs.get('category_slug')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        obj = get_object_or_404(queryset, slug=slug)
         obj.views_count += 1
         obj.save(update_fields=['views_count'])
         return obj
 
 
 class BlogPostCommentCreateView(View):
-    def post(self, request, slug):
-        post = get_object_or_404(BlogPost, slug=slug, status='published')
+    def post(self, request, slug, category_slug=None):
+        queryset = BlogPost.objects.filter(status='published')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        post = get_object_or_404(queryset, slug=slug)
         form = CommentForm(request.POST)
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('is_ajax') == '1' or 'application/json' in request.headers.get('Accept', '')
 
@@ -117,8 +125,11 @@ class BlogPostCommentCreateView(View):
 
 
 class BlogPostLikeToggleView(View):
-    def post(self, request, slug):
-        post = get_object_or_404(BlogPost, slug=slug, status='published')
+    def post(self, request, slug, category_slug=None):
+        queryset = BlogPost.objects.filter(status='published')
+        if category_slug:
+            queryset = queryset.filter(category__slug=category_slug)
+        post = get_object_or_404(queryset, slug=slug)
         is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('is_ajax') == '1' or 'application/json' in request.headers.get('Accept', '')
 
         if not request.session.session_key:

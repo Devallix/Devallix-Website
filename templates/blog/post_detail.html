@@ -348,7 +348,7 @@
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                         <!-- Like Button -->
                         <div class="d-flex align-items-center gap-3">
-                            <form method="post" action="{% url 'blog:post_like_toggle' post.slug %}" id="like-form" class="m-0">
+                            <form method="post" action="{% if post.category %}{% url 'blog:post_like_toggle' post.category.slug post.slug %}{% else %}{% url 'blog:post_like_toggle_plain' post.slug %}{% endif %}" id="like-form" class="m-0">
                                 {% csrf_token %}
                                 <button type="submit" id="like-btn" class="btn-like {% if has_liked %}liked{% endif %}" title="{% if has_liked %}Unlike this article{% else %}Like this article{% endif %}" data-liked="{% if has_liked %}true{% else %}false{% endif %}">
                                     <span class="like-icon-wrap">
@@ -399,7 +399,7 @@
                         <!-- Dynamic Alert Message -->
                         <div id="comment-form-alert" class="alert d-none mb-3" role="alert" style="border-radius:var(--radius-sm);font-size:0.9rem;"></div>
 
-                        <form method="post" action="{% url 'blog:post_comment' post.slug %}" id="comment-post-form">
+                        <form method="post" action="{% if post.category %}{% url 'blog:post_comment' post.category.slug post.slug %}{% else %}{% url 'blog:post_comment_plain' post.slug %}{% endif %}" id="comment-post-form">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="comment_name" class="form-label" style="font-weight:600;font-size:0.9rem;color:var(--text-white);">
