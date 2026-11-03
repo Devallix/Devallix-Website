@@ -45,4 +45,6 @@ class GraphicDesignProject(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('graphic_design:design_detail', kwargs={'slug': self.slug})
+        if self.project_url:
+            return self.project_url
+        return reverse('graphic_design:design_list')

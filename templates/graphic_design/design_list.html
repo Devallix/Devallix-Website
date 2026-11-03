@@ -68,11 +68,11 @@
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|divisibleby:3|yesno:'100,200,300' }}">
                 <div class="card-custom h-100 hover-lift" style="padding:0;overflow:hidden;">
                     {% if design.image %}
-                    <div style="height:240px;overflow:hidden;">
+                    <div style="height:100px;overflow:hidden;">
                         <img src="{{ design.image.url }}" alt="{{ design.name }}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     </div>
                     {% else %}
-                    <div style="height:240px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));display:flex;align-items:center;justify-content:center;">
+                    <div style="height:100px;background:linear-gradient(135deg,var(--bg-card),var(--bg-secondary));display:flex;align-items:center;justify-content:center;">
                         <i class="fas fa-palette" style="font-size:3rem;color:var(--text-dim);"></i>
                     </div>
                     {% endif %}
@@ -91,7 +91,7 @@
                             <span style="color:var(--text-dim);font-size:0.8rem;">
                                 {% if design.client %}<i class="fas fa-user me-1"></i>{{ design.client }}{% else %}<i class="far fa-calendar me-1"></i>{{ design.created_at|date:"M Y" }}{% endif %}
                             </span>
-                            <a href="{{ design.get_absolute_url }}" class="btn btn-sm btn-primary-custom" style="padding:6px 14px;">
+                            <a href="{{ design.project_url }}" class="btn btn-sm btn-primary-custom" style="padding:6px 14px;">
                                 <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
