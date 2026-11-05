@@ -4,7 +4,6 @@ from django.urls import reverse
 
 from apps.blog.models import BlogPost
 from apps.desktop_apps.models import DesktopApplication
-from apps.graphic_design.models import GraphicDesignProject
 from apps.mobile_apps.models import MobileApp
 from apps.web_projects.models import WebProject
 
@@ -94,7 +93,7 @@ class GraphicDesignSitemap(CanonicalDomainSitemap):
     priority = 0.6
 
     def items(self):
-        return GraphicDesignProject.objects.filter(published=True)
+        return []
 
     def lastmod(self, obj):
         return obj.updated_at
