@@ -100,8 +100,9 @@ Disallow: /accounts/password-change/
 Disallow: /accounts/password-reset/
 Disallow: /accounts/password-reset-confirm/
 
-Sitemap: https://{settings.SITE_DOMAIN}/sitemap.xml
-"""
+    Sitemap: https://devallix.com/sitemap.xml
+    Sitemap: https://www.devallix.com/sitemap.xml
+    """
 
 
 @cache_control(public=True, max_age=60 * 60 * 24)
