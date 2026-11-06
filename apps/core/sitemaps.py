@@ -82,6 +82,9 @@ class StaticViewSitemap(CanonicalDomainSitemap):
                 'priority': priority,
             }
 
+    def lastmod(self, item):
+        return None
+
 
 class BlogPostSitemap(CanonicalDomainSitemap):
     changefreq = 'weekly'
