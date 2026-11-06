@@ -25,62 +25,23 @@ class StaticViewSitemap(CanonicalDomainSitemap):
 
     def items(self):
         return [
-            ('core:home', None),
-            ('core:home', 'devallix.com'),
-            ('core:about', None),
-            ('core:skills', None),
-            ('portfolio:portfolio', None),
-            ('desktop_apps:app_list', None),
-            ('web_projects:project_list', None),
-            ('mobile_apps:app_list', None),
-            ('graphic_design:design_list', None),
-            ('blog:post_list', None),
-            ('testimonials:testimonial_list', None),
-            ('contact:contact', None),
-            ('core:privacy_policy', None),
-            ('core:terms', None),
+            'core:home',
+            'core:about',
+            'core:skills',
+            'portfolio:portfolio',
+            'desktop_apps:app_list',
+            'web_projects:project_list',
+            'mobile_apps:app_list',
+            'graphic_design:design_list',
+            'blog:post_list',
+            'testimonials:testimonial_list',
+            'contact:contact',
+            'core:privacy_policy',
+            'core:terms',
         ]
 
-    def _urls(self, page, site, protocol):
-        from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-        items = self.items()
-        paginator = Paginator(items, self.limit)
-
-        try:
-            page = paginator.page(page)
-        except PageNotAnInteger:
-            page = paginator.page(1)
-        except EmptyPage:
-            page = paginator.page(paginator.num_pages)
-
-        for item in page.object_list:
-            if isinstance(item, tuple):
-                url_name, domain = item
-            else:
-                url_name, domain = item, None
-
-            path = reverse(url_name)
-            if domain:
-                full_url = f'{protocol}://{domain}{path}'
-            else:
-                default_domain = self.get_domain(site)
-                full_url = f'{protocol}://{default_domain}{path}'
-
-            priority = self.priority
-            if callable(priority):
-                priority = priority(url_name)
-            lastmod = self.lastmod(url_name)
-            changefreq = self.changefreq
-            if callable(changefreq):
-                changefreq = changefreq(url_name)
-
-            yield {
-                'location': full_url,
-                'lastmod': lastmod,
-                'changefreq': changefreq,
-                'priority': priority,
-            }
+    def location(self, item):
+        return reverse(item)
 
     def lastmod(self, item):
         return None
