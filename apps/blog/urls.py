@@ -5,6 +5,8 @@ app_name = 'blog'
 
 urlpatterns = [
     path('', views.BlogListView.as_view(), name='post_list'),
+    path('useful-website-directory/', views.DirectoryView.as_view(), name='useful_website_directory'),
+    path('useful-website-directory/<slug:slug>/', views.DirectorySubCategoryView.as_view(), name='useful_website_directory_subcategory'),
     path('category/<slug:slug>/', views.BlogCategoryDetailView.as_view(), name='category_detail'),
     path('tag/<slug:slug>/', views.BlogTagDetailView.as_view(), name='tag_detail'),
     path('<slug:category_slug>/<slug:slug>/comment/', views.BlogPostCommentCreateView.as_view(), name='post_comment'),

@@ -141,6 +141,33 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('id_category');
+    const subcategoryWrapper = document.getElementById('subcategoryFieldWrapper');
+    const subcategoryField = document.getElementById('id_subcategory');
+    const usefulWebsitesCategoryId = {{ useful_websites_category_id|default:'null' }};
+
+    if (!categorySelect || !subcategoryWrapper || !subcategoryField) return;
+
+    function toggleSubcategoryField() {
+        const selectedValue = categorySelect.value;
+        const hasExistingValue = subcategoryField.value;
+        if ((usefulWebsitesCategoryId && selectedValue == usefulWebsitesCategoryId) || hasExistingValue) {
+            subcategoryWrapper.style.display = 'block';
+            subcategoryField.required = true;
+        } else {
+            subcategoryWrapper.style.display = 'none';
+            subcategoryField.required = false;
+            subcategoryField.value = '';
+        }
+    }
+
+    categorySelect.addEventListener('change', toggleSubcategoryField);
+    toggleSubcategoryField();
+});
+</script>
+
 {% include 'dashboard/includes/blog_category_modal.html' %}
 {% endblock %}
 

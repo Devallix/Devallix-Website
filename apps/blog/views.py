@@ -2,7 +2,8 @@ from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from .models import BlogPost, BlogCategory, Tag, Comment, PostLike
+from django.db.models import Count
+from .models import BlogPost, BlogCategory, Tag, Comment, PostLike, BlogSubCategory, BlogSubCategory
 from .forms import CommentForm
 
 
@@ -205,4 +206,55 @@ class BlogTagDetailView(ListView):
         context = super().get_context_data(**kwargs)
         context['tag'] = self.tag
         context['tags'] = Tag.objects.all()
+        return context
+
+
+class DirectoryView(ListView):
+    """Useful Websites directory - shows sub-categories as image cards."""
+    template_name = 'blog/useful-website-directory.html'
+    context_object_name = 'subcategories'
+    paginate_by = None
+
+    def get_queryset(self):
+        useful_category = BlogCategory.objects.filter(
+            is_useful_websites_directory=True
+        ).first()
+        if not useful_category:
+            return BlogSubCategory.objects.none()
+        return BlogSubCategory.objects.filter(
+            category=useful_category, is_active=True
+        ).annotate(posts_count=Count('posts')).order_by('display_order', 'name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['useful_category'] = BlogCategory.objects.filter(
+            is_useful_websites_directory=True
+        ).first()
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
+
+
+class DirectorySubCategoryView(ListView):
+    """Shows published blog posts under a specific sub-category."""
+    model = BlogPost
+    template_name = 'blog/useful-website-directory_subcategory.html'
+    context_object_name = 'posts'
+    paginate_by = 9
+
+    def get_queryset(self):
+        self.subcategory = get_object_or_404(
+            BlogSubCategory, slug=self.kwargs['slug'], is_active=True
+        )
+        qs = BlogPost.objects.filter(
+            status='published', subcategory=self.subcategory
+        ).select_related('author', 'category').prefetch_related('tags')
+        search = self.request.GET.get('q')
+        if search:
+            qs = qs.filter(title__icontains=search) | qs.filter(content__icontains=search)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['subcategory'] = self.subcategory
+        context['search_query'] = self.request.GET.get('q', '')
         return context

@@ -48,3 +48,7 @@ class GraphicDesignProject(models.Model):
         if self.project_url:
             return self.project_url
         return reverse('graphic_design:design_list')
+
+    @property
+    def tools_list(self):
+        return [t.strip() for t in self.tools.split(',') if t.strip()] if self.tools else []

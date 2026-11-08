@@ -14,7 +14,7 @@ from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.graphic_design.models import GraphicDesignProject
 from apps.portfolio.models import Skill, SkillCategory, Technology
-from apps.blog.models import BlogPost, BlogCategory, Tag, Comment
+from apps.blog.models import BlogPost, BlogCategory, Tag, Comment, BlogSubCategory
 from apps.contact.models import ContactMessage
 from apps.testimonials.models import Testimonial
 from apps.newsletter.models import NewsletterSubscriber, Newsletter
@@ -23,7 +23,7 @@ from apps.accounts.models import Profile
 from .forms import (
     AppForm, VersionForm, ProjectForm, SkillForm, BlogPostForm,
     TestimonialForm, CategoryForm, SiteSettingsForm, MobileAppForm,
-    GraphicDesignForm, BlogCategoryForm
+    GraphicDesignForm, BlogCategoryForm, BlogSubCategoryForm
 )
 
 
@@ -326,7 +326,7 @@ class BlogPostListView(DashboardLoginRequiredMixin, ListView):
     model = BlogPost
     template_name = 'dashboard/blog_list.html'
     context_object_name = 'posts'
-    paginate_by = 20
+    paginate_by = 15
 
     def get_queryset(self):
         qs = BlogPost.objects.select_related('author', 'category').all()
@@ -364,6 +364,14 @@ class BlogPostCreateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Creat
             form.instance.published_at = timezone.now()
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['useful_websites_category_id'] = (
+            BlogCategory.objects.filter(is_useful_websites_directory=True)
+            .values_list('id', flat=True).first()
+        )
+        return context
+
 
 class BlogPostUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = BlogPost
@@ -371,6 +379,14 @@ class BlogPostUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, Updat
     form_class = BlogPostForm
     success_url = reverse_lazy('dashboard:blog_list')
     success_message = 'Blog post updated successfully.'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['useful_websites_category_id'] = (
+            BlogCategory.objects.filter(is_useful_websites_directory=True)
+            .values_list('id', flat=True).first()
+        )
+        return context
 
 
 class BlogPostDeleteView(DashboardLoginRequiredMixin, DeleteView):
@@ -397,6 +413,9 @@ class BlogCategoryListView(DashboardLoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('search') or self.request.GET.get('q') or ''
+        context['subcategories'] = BlogSubCategory.objects.select_related('category').annotate(
+            posts_count=Count('posts')
+        ).order_by('display_order', 'name')
         return context
 
 
@@ -440,6 +459,54 @@ class BlogCategoryDeleteView(DashboardLoginRequiredMixin, DeleteView):
     context_object_name = 'category'
     success_url = reverse_lazy('dashboard:blog_category_list')
     success_message = 'Blog category deleted successfully.'
+
+
+class BlogSubCategoryListView(DashboardLoginRequiredMixin, ListView):
+    model = BlogSubCategory
+    template_name = 'dashboard/blog_subcategory_list.html'
+    context_object_name = 'subcategories'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = BlogSubCategory.objects.select_related('category').all()
+        search = self.request.GET.get('search') or self.request.GET.get('q')
+        category = self.request.GET.get('category')
+        if search:
+            qs = qs.filter(name__icontains=search)
+        if category:
+            qs = qs.filter(category__slug=category)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search') or self.request.GET.get('q') or ''
+        context['selected_category'] = self.request.GET.get('category', '')
+        context['categories'] = BlogCategory.objects.all()
+        return context
+
+
+class BlogSubCategoryCreateView(DashboardLoginRequiredMixin, SuccessMessageMixin, CreateView):
+    model = BlogSubCategory
+    template_name = 'dashboard/blog_subcategory_form.html'
+    form_class = BlogSubCategoryForm
+    success_url = reverse_lazy('dashboard:blog_subcategory_list')
+    success_message = 'Blog sub-category created successfully.'
+
+
+class BlogSubCategoryUpdateView(DashboardLoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = BlogSubCategory
+    template_name = 'dashboard/blog_subcategory_form.html'
+    form_class = BlogSubCategoryForm
+    success_url = reverse_lazy('dashboard:blog_subcategory_list')
+    success_message = 'Blog sub-category updated successfully.'
+
+
+class BlogSubCategoryDeleteView(DashboardLoginRequiredMixin, DeleteView):
+    model = BlogSubCategory
+    template_name = 'dashboard/blog_subcategory_confirm_delete.html'
+    context_object_name = 'subcategory'
+    success_url = reverse_lazy('dashboard:blog_subcategory_list')
+    success_message = 'Blog sub-category deleted successfully.'
 
 
 class MessageListView(DashboardLoginRequiredMixin, ListView):

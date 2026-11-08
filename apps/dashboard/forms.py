@@ -6,7 +6,7 @@ from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.graphic_design.models import GraphicDesignProject
 from apps.portfolio.models import Skill, SkillCategory
-from apps.blog.models import BlogPost, BlogCategory
+from apps.blog.models import BlogPost, BlogCategory, BlogSubCategory
 from apps.testimonials.models import Testimonial
 from apps.core.models import SiteSettings
 
@@ -274,7 +274,7 @@ class BlogPostForm(forms.ModelForm):
     class Meta:
         model = BlogPost
         fields = [
-            'title', 'category', 'tags', 'featured_image', 'excerpt',
+            'title', 'category', 'subcategory', 'tags', 'featured_image', 'excerpt',
             'content', 'status', 'featured', 'is_recent', 'is_trending',
             'meta_title', 'meta_description', 'meta_keywords',
             'meta_og_title', 'meta_og_description',
@@ -284,6 +284,7 @@ class BlogPostForm(forms.ModelForm):
             'excerpt': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 8}),
             'category': forms.Select(attrs={'class': 'form-select'}),
+            'subcategory': forms.Select(attrs={'class': 'form-select'}),
             'tags': forms.CheckboxSelectMultiple(),
             'status': forms.Select(attrs={'class': 'form-select'}),
             'featured_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
@@ -300,6 +301,7 @@ class BlogPostForm(forms.ModelForm):
             'featured': 'Featured post',
             'is_recent': 'Show in Recent Articles (sidebar)',
             'is_trending': 'Show in Trending / Must Read (sidebar)',
+            'subcategory': 'Useful Website Sub-Category',
             'meta_keywords': 'Meta keywords',
             'meta_og_title': 'Meta OG title',
             'meta_og_description': 'Meta OG description',
@@ -310,10 +312,14 @@ class BlogPostForm(forms.ModelForm):
             'meta_keywords': 'Comma-separated keywords, e.g. AI, business, technology.',
             'meta_og_title': 'Used for the og:title tag when shared on social media. Falls back to the meta title.',
             'meta_og_description': 'Used for the og:description tag when shared on social media. Falls back to the meta description.',
+            'subcategory': 'Only shown when the category is "Useful Websites". Select the sub-category this resource belongs to.',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['subcategory'].queryset = BlogSubCategory.objects.filter(is_active=True)
+        self.fields['subcategory'].required = False
+        self.fields['category'].required = True
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_enctype = 'multipart/form-data'
@@ -332,6 +338,12 @@ class BlogPostForm(forms.ModelForm):
                     css_class='col-md-6 mb-3'
                 ),
                 Column('status', css_class='col-md-6 mb-3'),
+            ),
+            Div(
+                Field('subcategory', css_class='form-select'),
+                css_class='mb-3',
+                id='subcategoryFieldWrapper',
+                style='display:none;'
             ),
             'tags',
             'featured_image',
@@ -360,11 +372,18 @@ class BlogPostForm(forms.ModelForm):
 class BlogCategoryForm(DisplayOrderMixin, forms.ModelForm):
     class Meta:
         model = BlogCategory
-        fields = ['name', 'description', 'display_order']
+        fields = ['name', 'description', 'is_useful_websites_directory', 'display_order']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Artificial Intelligence, Tutorials'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Optional description of this category...'}),
+            'is_useful_websites_directory': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'is_useful_websites_directory': 'Useful Websites Directory Category',
+        }
+        help_texts = {
+            'is_useful_websites_directory': 'If enabled, sub-categories can be created under this category and shown in the Useful Websites directory.',
         }
 
     def __init__(self, *args, **kwargs):
@@ -374,9 +393,44 @@ class BlogCategoryForm(DisplayOrderMixin, forms.ModelForm):
         self.helper.layout = Layout(
             'name',
             'description',
-            'display_order',
+            Row(
+                Column('is_useful_websites_directory', css_class='col-auto'),
+                Column('display_order', css_class='col-md-3'),
+            ),
             ButtonHolder(
                 Submit('submit', 'Save Category', css_class='btn btn-accent mt-3')
+            ),
+        )
+
+
+class BlogSubCategoryForm(DisplayOrderMixin, forms.ModelForm):
+    class Meta:
+        model = BlogSubCategory
+        fields = ['name', 'category', 'image', 'display_order', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. React, Vue, Tailwind'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'display_order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = BlogCategory.objects.all()
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_enctype = 'multipart/form-data'
+        self.helper.layout = Layout(
+            'name',
+            'category',
+            'image',
+            Row(
+                Column('display_order', css_class='col-md-6'),
+                Column('is_active', css_class='col-md-6'),
+            ),
+            ButtonHolder(
+                Submit('submit', 'Save Sub-Category', css_class='btn btn-accent mt-3')
             ),
         )
 

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
+from django.db.models import Count
 from django.http import FileResponse, Http404, HttpResponse
 from django.views.decorators.cache import cache_control
 from django.views.generic import TemplateView
@@ -12,6 +13,8 @@ from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.testimonials.models import Testimonial
 from apps.portfolio.models import Skill, SkillCategory
+from apps.blog.models import BlogPost, BlogSubCategory, BlogCategory
+from apps.graphic_design.models import GraphicDesignProject
 
 FAVICON_MIME_TYPES = {
     '.ico': 'image/x-icon',
@@ -131,11 +134,21 @@ class HomeView(TemplateView):
         context['featured_mobile_apps'] = MobileApp.objects.filter(
             featured=True, status='completed'
         )[:6]
+        context['featured_designs'] = GraphicDesignProject.objects.filter(
+            featured=True, published=True
+        )[:6]
+        context['useful_website_subcategories'] = BlogSubCategory.objects.filter(
+            is_active=True,
+            category__is_useful_websites_directory=True
+        ).annotate(posts_count=Count('posts')).order_by('display_order', 'name')[:4]
         context['testimonials'] = Testimonial.objects.filter(
             featured=True, is_active=True
         )[:5]
         context['skills'] = Skill.objects.filter(is_featured=True)[:12]
         context['skill_categories'] = SkillCategory.objects.all()
+        context['featured_posts'] = BlogPost.objects.filter(
+            status='published', featured=True
+        ).select_related('author', 'category').prefetch_related('tags')[:4]
         context['stats'] = {
             'apps_built': DesktopApplication.objects.filter(published=True).count(),
             'web_projects': WebProject.objects.filter(status='completed').count(),

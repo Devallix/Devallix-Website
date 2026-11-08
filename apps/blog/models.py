@@ -9,6 +9,7 @@ class BlogCategory(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     display_order = models.PositiveIntegerField(default=0)
+    is_useful_websites_directory = models.BooleanField(default=False, help_text='If enabled, this category appears as the Useful Websites directory parent.')
 
     class Meta:
         ordering = ['display_order']
@@ -31,6 +32,31 @@ class BlogCategory(models.Model):
 
     def get_absolute_url(self):
         return reverse('blog:category_detail', kwargs={'slug': self.slug})
+
+
+class BlogSubCategory(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
+    category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, related_name='subcategories')
+    image = models.ImageField(upload_to='uploads/blog/subcategories/', blank=True, null=True)
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = 'Blog Sub-Category'
+        verbose_name_plural = 'Blog Sub-Categories'
+
+    def __str__(self):
+        return f"{self.category.name} / {self.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name) or 'subcategory'
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('blog:subcategory_detail', kwargs={'slug': self.slug})
 
 
 class Tag(models.Model):
@@ -63,6 +89,7 @@ class BlogPost(models.Model):
     slug = models.SlugField(max_length=300, unique=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='blog_posts')
     category = models.ForeignKey(BlogCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
+    subcategory = models.ForeignKey(BlogSubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
     tags = models.ManyToManyField(Tag, blank=True, related_name='posts')
     featured_image = models.ImageField(upload_to='uploads/blog/', blank=True, null=True)
     excerpt = models.TextField(max_length=500, blank=True)

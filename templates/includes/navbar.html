@@ -65,8 +65,31 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.resolver_match.app_name == 'graphic_design' %}active{% endif %}" href="{% url 'graphic_design:design_list' %}">Graphic Design</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.app_name == 'blog' %}active{% endif %}" href="{% url 'blog:post_list' %}">Blog</a>
+                <li class="nav-item dropdown nav-apps-dropdown">
+                    <a class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'blog' or request.resolver_match.url_name == 'useful_website_directory' or request.resolver_match.url_name == 'useful_website_directory_subcategory' %}active{% endif %}" href="#" id="blogDropdown" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                        Blog <i class="fas fa-chevron-down nav-chevron"></i>
+                    </a>
+                    <ul class="dropdown-menu nav-dropdown apps-menu" aria-labelledby="blogDropdown">
+                        <li class="apps-menu-header">Blog & Resources</li>
+                        <li>
+                            <a class="dropdown-item apps-menu-item" href="{% url 'blog:post_list' %}">
+                                <span class="apps-menu-icon"><i class="fas fa-blog"></i></span>
+                                <span class="apps-menu-text">
+                                    <strong>Blog Posts</strong>
+                                    <small>Latest articles and tutorials</small>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item apps-menu-item" href="{% url 'blog:useful_website_directory' %}">
+                                <span class="apps-menu-icon"><i class="fas fa-globe"></i></span>
+                                <span class="apps-menu-text">
+                                    <strong>Useful Websites</strong>
+                                    <small>Website discovery directory</small>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
 
