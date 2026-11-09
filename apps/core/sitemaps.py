@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
-from apps.blog.models import BlogPost
+from apps.blog.models import BlogPost, BlogSubCategory
 from apps.desktop_apps.models import DesktopApplication
 from apps.mobile_apps.models import MobileApp
 from apps.web_projects.models import WebProject
@@ -34,6 +34,7 @@ class StaticViewSitemap(CanonicalDomainSitemap):
             'mobile_apps:app_list',
             'graphic_design:design_list',
             'blog:post_list',
+            'blog:useful_website_directory',
             'testimonials:testimonial_list',
             'contact:contact',
             'core:privacy_policy',
@@ -56,6 +57,22 @@ class BlogPostSitemap(CanonicalDomainSitemap):
 
     def lastmod(self, obj):
         return obj.updated_at
+
+
+class DirectorySubCategorySitemap(CanonicalDomainSitemap):
+    changefreq = 'weekly'
+    priority = 0.6
+
+    def items(self):
+        return BlogSubCategory.objects.filter(
+            is_active=True, category__is_useful_websites_directory=True
+        ).select_related('category').order_by('display_order', 'name')
+
+    def location(self, item):
+        return reverse('blog:useful_website_directory_subcategory', kwargs={'slug': item.slug})
+
+    def lastmod(self, obj):
+        return None
 
 
 class WebProjectSitemap(CanonicalDomainSitemap):
@@ -105,6 +122,7 @@ class GraphicDesignSitemap(CanonicalDomainSitemap):
 sitemaps = {
     'static': StaticViewSitemap,
     'blog': BlogPostSitemap,
+    'directory-subcategories': DirectorySubCategorySitemap,
     'web-projects': WebProjectSitemap,
     'desktop-apps': DesktopApplicationSitemap,
     'mobile-apps': MobileAppSitemap,
