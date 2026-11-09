@@ -59,52 +59,56 @@ def favicon(request):
 
 
 ROBOTS_TXT = f"""\
-User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
 Allow: /
+Disallow: /accounts/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /accounts/login/
-Disallow: /accounts/logout/
-Disallow: /accounts/profile/
-Disallow: /accounts/password-change/
-Disallow: /accounts/password-reset/
-Disallow: /accounts/password-reset-confirm/
 
-User-agent: Bingbot
+User-agent: GPTBot
 Allow: /
+Disallow: /accounts/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /accounts/login/
-Disallow: /accounts/logout/
-Disallow: /accounts/profile/
-Disallow: /accounts/password-change/
-Disallow: /accounts/password-reset/
-Disallow: /accounts/password-reset-confirm/
 
-User-agent: Googlebot
+User-agent: ClaudeBot
 Allow: /
+Disallow: /accounts/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /accounts/login/
-Disallow: /accounts/logout/
-Disallow: /accounts/profile/
-Disallow: /accounts/password-change/
-Disallow: /accounts/password-reset/
-Disallow: /accounts/password-reset-confirm/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /accounts/
+Disallow: /dashboard/
+Disallow: /admin/
+
+User-agent: PetalBot
+Allow: /
+Disallow: /accounts/
+Disallow: /dashboard/
+Disallow: /admin/
+
+User-agent: CCBot
+Allow: /
+Disallow: /accounts/
+Disallow: /dashboard/
+Disallow: /admin/
+
+User-agent: Bytespider
+Allow: /
+Disallow: /accounts/
+Disallow: /dashboard/
+Disallow: /admin/
 
 User-agent: *
 Allow: /
+Disallow: /accounts/
 Disallow: /dashboard/
 Disallow: /admin/
-Disallow: /accounts/login/
-Disallow: /accounts/logout/
-Disallow: /accounts/profile/
-Disallow: /accounts/password-change/
-Disallow: /accounts/password-reset/
-Disallow: /accounts/password-reset-confirm/
 
-    Sitemap: https://devallix.com/sitemap.xml
-    Sitemap: https://www.devallix.com/sitemap.xml
+Sitemap: https://devallix.com/sitemap.xml
+Sitemap: https://www.devallix.com/sitemap.xml
     """
 
 
