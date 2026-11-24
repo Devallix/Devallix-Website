@@ -35,6 +35,9 @@ class GraphicDesignProject(models.Model):
         ordering = ['display_order', '-created_at']
         verbose_name = 'Graphic Design Project'
         verbose_name_plural = 'Graphic Design Projects'
+        indexes = [
+            models.Index(fields=['published', 'featured'], name='design_pub_featured_idx'),
+        ]
 
     def __str__(self):
         return self.name

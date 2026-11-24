@@ -63,27 +63,39 @@ class DashboardHomeView(DashboardLoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_apps'] = DesktopApplication.objects.count()
+
+        apps = list(DesktopApplication.objects.all())
+        published_apps = [app for app in apps if app.published]
+        message_stats = ContactMessage.objects.aggregate(
+            total=Count('id'), unread=Count('id', filter=Q(status='unread'))
+        )
+        comment_stats = Comment.objects.aggregate(
+            total=Count('id'), pending=Count('id', filter=Q(is_approved=False))
+        )
+
+        context['total_apps'] = len(apps)
         context['total_projects'] = WebProject.objects.count()
         context['total_mobile_apps'] = MobileApp.objects.count()
         context['total_designs'] = GraphicDesignProject.objects.count()
         context['total_downloads'] = Download.objects.count()
-        context['total_messages'] = ContactMessage.objects.count()
-        context['unread_messages'] = ContactMessage.objects.filter(status='unread').count()
-        context['total_subscribers'] = NewsletterSubscriber.objects.filter(is_active=True).count()
+        context['total_messages'] = message_stats['total']
+        context['unread_messages'] = message_stats['unread']
+        context['total_subscribers'] = NewsletterSubscriber.objects.filter(
+            is_active=True
+        ).count()
         context['total_posts'] = BlogPost.objects.count()
-        context['total_comments'] = Comment.objects.count()
-        context['pending_comments'] = Comment.objects.filter(is_approved=False).count()
+        context['total_comments'] = comment_stats['total']
+        context['pending_comments'] = comment_stats['pending']
         context['total_testimonials'] = Testimonial.objects.count()
         context['recent_messages'] = ContactMessage.objects.all()[:5]
-        context['recent_downloads'] = Download.objects.select_related('application').all()[:5]
+        context['recent_downloads'] = Download.objects.select_related(
+            'application'
+        ).all()[:5]
         context['recent_subscribers'] = NewsletterSubscriber.objects.all()[:5]
-        context['app_download_stats'] = DesktopApplication.objects.filter(
-            published=True
-        ).order_by('-download_count')[:5]
-        context['total_app_downloads'] = DesktopApplication.objects.aggregate(
-            total=Sum('download_count')
-        )['total'] or 0
+        context['app_download_stats'] = sorted(
+            published_apps, key=lambda app: (-app.download_count, app.name)
+        )[:5]
+        context['total_app_downloads'] = sum(app.download_count for app in apps)
         return context
 
 
@@ -353,7 +365,16 @@ class BlogPostListView(DashboardLoginRequiredMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        qs = BlogPost.objects.select_related('author', 'category').all()
+        qs = (
+            BlogPost.objects.select_related('author', 'category')
+            .annotate(
+                likes_count_annotation=Count('likes', distinct=True),
+                approved_comments_count_annotation=Count(
+                    'comments', filter=Q(comments__is_approved=True), distinct=True
+                ),
+            )
+            .order_by('-published_at', '-created_at')
+        )
         search = self.request.GET.get('search') or self.request.GET.get('q')
         status = self.request.GET.get('status')
         category = self.request.GET.get('category')
@@ -619,7 +640,7 @@ class SubscriberExportView(DashboardLoginRequiredMixin, View):
         response['Content-Disposition'] = 'attachment; filename="subscribers.csv"'
         writer = csv.writer(response)
         writer.writerow(['Email', 'Name', 'Active', 'Subscribed At'])
-        for sub in NewsletterSubscriber.objects.all():
+        for sub in NewsletterSubscriber.objects.all().iterator():
             writer.writerow([sub.email, sub.name, sub.is_active, sub.created_at])
         return response
 
@@ -629,6 +650,11 @@ class CategoryListView(DashboardLoginRequiredMixin, ListView):
     template_name = 'dashboard/category_list.html'
     context_object_name = 'categories'
     paginate_by = 20
+
+    def get_queryset(self):
+        return ApplicationCategory.objects.annotate(
+            applications_count=Count('applications')
+        )
 
 
 class CategoryCreateView(DashboardLoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -663,13 +689,17 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        today = timezone.localdate()
-        yesterday = today - timedelta(days=1)
-        week_start = today - timedelta(days=6)
-        previous_week_end = week_start - timedelta(days=1)
+        # Use datetime bounds instead of __date lookups so SQLite can use the
+        # downloaded_at/created_at indexes added for these filters.
+        today_start = timezone.localtime().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        today_end = today_start + timedelta(days=1)
+        today = today_start.date()
+        yesterday_start = today_start - timedelta(days=1)
+        week_start = today_start - timedelta(days=6)
         previous_week_start = week_start - timedelta(days=7)
-        month_start = today - timedelta(days=29)
-        previous_month_end = month_start - timedelta(days=1)
+        month_start = today_start - timedelta(days=29)
         previous_month_start = month_start - timedelta(days=30)
 
         try:
@@ -677,36 +707,59 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
         except (TypeError, ValueError):
             trend_days = 14
         trend_days = trend_days if trend_days in {7, 14, 30} else 14
-        trend_start = today - timedelta(days=trend_days - 1)
+        trend_start_date = today - timedelta(days=trend_days - 1)
+        trend_start = today_start - timedelta(days=trend_days - 1)
 
         downloads_qs = Download.objects.all()
-        total_downloads = downloads_qs.count()
-        today_downloads = downloads_qs.filter(downloaded_at__date=today).count()
-        yesterday_downloads = downloads_qs.filter(downloaded_at__date=yesterday).count()
-        week_downloads = downloads_qs.filter(downloaded_at__date__gte=week_start).count()
-        previous_week_downloads = downloads_qs.filter(
-            downloaded_at__date__range=(previous_week_start, previous_week_end)
-        ).count()
-        month_downloads = downloads_qs.filter(downloaded_at__date__gte=month_start).count()
-        previous_month_downloads = downloads_qs.filter(
-            downloaded_at__date__range=(previous_month_start, previous_month_end)
-        ).count()
-        unique_downloaders = downloads_qs.exclude(
-            ip_address__isnull=True
-        ).values('ip_address').distinct().count()
-        registered_downloaders = downloads_qs.filter(user__isnull=False).values(
-            'user'
-        ).distinct().count()
+        download_stats = downloads_qs.aggregate(
+            total=Count('id'),
+            today=Count(
+                'id',
+                filter=Q(downloaded_at__gte=today_start, downloaded_at__lt=today_end),
+            ),
+            yesterday=Count(
+                'id',
+                filter=Q(
+                    downloaded_at__gte=yesterday_start, downloaded_at__lt=today_start
+                ),
+            ),
+            week=Count('id', filter=Q(downloaded_at__gte=week_start)),
+            previous_week=Count(
+                'id',
+                filter=Q(
+                    downloaded_at__gte=previous_week_start,
+                    downloaded_at__lt=week_start,
+                ),
+            ),
+            month=Count('id', filter=Q(downloaded_at__gte=month_start)),
+            previous_month=Count(
+                'id',
+                filter=Q(
+                    downloaded_at__gte=previous_month_start,
+                    downloaded_at__lt=month_start,
+                ),
+            ),
+            unique_ips=Count('ip_address', distinct=True),
+            unique_users=Count('user', distinct=True),
+        )
+        total_downloads = download_stats['total']
+        today_downloads = download_stats['today']
+        yesterday_downloads = download_stats['yesterday']
+        week_downloads = download_stats['week']
+        previous_week_downloads = download_stats['previous_week']
+        month_downloads = download_stats['month']
+        previous_month_downloads = download_stats['previous_month']
+        unique_downloaders = download_stats['unique_ips']
+        registered_downloaders = download_stats['unique_users']
 
         # Application counters are kept for older installs; recorded Download
         # rows are the source of truth for time-based analytics.
-        app_counter_total = DesktopApplication.objects.aggregate(
-            total=Sum('download_count')
-        )['total'] or 0
-
-        apps = DesktopApplication.objects.annotate(
-            recorded_downloads=Count('downloads')
+        apps = list(
+            DesktopApplication.objects.annotate(
+                recorded_downloads=Count('downloads')
+            )
         )
+        app_counter_total = sum(app.download_count for app in apps)
         app_stats = []
         for app in apps:
             downloads = app.recorded_downloads or app.download_count
@@ -747,7 +800,7 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
 
         daily_counts = defaultdict(int)
         for row in (
-            downloads_qs.filter(downloaded_at__date__gte=trend_start)
+            downloads_qs.filter(downloaded_at__gte=trend_start)
             .annotate(day=TruncDate('downloaded_at'))
             .values('day')
             .annotate(count=Count('id'))
@@ -756,7 +809,7 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
             daily_counts[row['day']] += row['count']
         trend_data = []
         for offset in range(trend_days):
-            day = trend_start + timedelta(days=offset)
+            day = trend_start_date + timedelta(days=offset)
             trend_data.append({
                 'date': day.isoformat(),
                 'label': day.strftime('%b %d'),
@@ -769,23 +822,37 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
 
         # Content, audience and engagement metrics from the rest of the site.
         published_posts_qs = BlogPost.objects.filter(status='published')
-        published_posts = published_posts_qs.count()
-        total_blog_views = published_posts_qs.aggregate(
-            total=Sum('views_count')
-        )['total'] or 0
-        total_comments = Comment.objects.count()
-        approved_comments = Comment.objects.filter(is_approved=True).count()
-        pending_comments = Comment.objects.filter(is_approved=False).count()
+        blog_stats = published_posts_qs.aggregate(
+            posts=Count('id'), views=Sum('views_count')
+        )
+        published_posts = blog_stats['posts']
+        total_blog_views = blog_stats['views'] or 0
+
+        comment_stats = Comment.objects.aggregate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(is_approved=True)),
+            pending=Count('id', filter=Q(is_approved=False)),
+        )
+        total_comments = comment_stats['total']
+        approved_comments = comment_stats['approved']
+        pending_comments = comment_stats['pending']
         total_likes = PostLike.objects.count()
-        active_subscribers = NewsletterSubscriber.objects.filter(is_active=True).count()
-        new_subscribers_30d = NewsletterSubscriber.objects.filter(
-            created_at__date__gte=month_start
-        ).count()
-        total_messages = ContactMessage.objects.count()
-        unread_messages = ContactMessage.objects.filter(status='unread').count()
-        messages_30d = ContactMessage.objects.filter(
-            created_at__date__gte=month_start
-        ).count()
+
+        subscriber_stats = NewsletterSubscriber.objects.aggregate(
+            active=Count('id', filter=Q(is_active=True)),
+            recent=Count('id', filter=Q(created_at__gte=month_start)),
+        )
+        active_subscribers = subscriber_stats['active']
+        new_subscribers_30d = subscriber_stats['recent']
+
+        message_stats = ContactMessage.objects.aggregate(
+            total=Count('id'),
+            unread=Count('id', filter=Q(status='unread')),
+            recent=Count('id', filter=Q(created_at__gte=month_start)),
+        )
+        total_messages = message_stats['total']
+        unread_messages = message_stats['unread']
+        messages_30d = message_stats['recent']
 
         top_posts = list(
             published_posts_qs.annotate(
@@ -844,8 +911,8 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
             'registered_downloaders': registered_downloaders,
             'app_download_stats': app_stats,
             'app_download_total': app_download_total,
-            'total_apps': DesktopApplication.objects.count(),
-            'published_apps': DesktopApplication.objects.filter(published=True).count(),
+            'total_apps': len(apps),
+            'published_apps': sum(1 for app in apps if app.published),
             'most_downloaded': next(
                 (item for item in app_stats if item['downloads'] > 0), None
             ),
@@ -866,7 +933,7 @@ class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
             'unread_messages': unread_messages,
             'messages_30d': messages_30d,
             'content_counts': {
-                'desktop_apps': DesktopApplication.objects.filter(published=True).count(),
+                'desktop_apps': sum(1 for app in apps if app.published),
                 'web_projects': WebProject.objects.count(),
                 'mobile_apps': MobileApp.objects.count(),
                 'graphic_designs': GraphicDesignProject.objects.filter(published=True).count(),
@@ -895,7 +962,7 @@ class CommentListView(DashboardLoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Comment.objects.select_related('post').all()
+        qs = Comment.objects.select_related('post__category', 'post__author').all()
         status = self.request.GET.get('status')
         post_id = self.request.GET.get('post_id')
         search = self.request.GET.get('q')
@@ -919,9 +986,14 @@ class CommentListView(DashboardLoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_comments'] = Comment.objects.count()
-        context['approved_comments'] = Comment.objects.filter(is_approved=True).count()
-        context['pending_comments'] = Comment.objects.filter(is_approved=False).count()
+        comment_stats = Comment.objects.aggregate(
+            total=Count('id'),
+            approved=Count('id', filter=Q(is_approved=True)),
+            pending=Count('id', filter=Q(is_approved=False)),
+        )
+        context['total_comments'] = comment_stats['total']
+        context['approved_comments'] = comment_stats['approved']
+        context['pending_comments'] = comment_stats['pending']
         context['current_status'] = self.request.GET.get('status', '')
         context['current_post_id'] = self.request.GET.get('post_id', '')
         context['search_query'] = self.request.GET.get('q', '')

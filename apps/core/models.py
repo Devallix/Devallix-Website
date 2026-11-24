@@ -1,4 +1,7 @@
+from django.core.cache import cache
 from django.db import models
+
+SITE_SETTINGS_CACHE_KEY = 'core:site-settings'
 
 
 class SiteSettings(models.Model):
@@ -39,8 +42,18 @@ class SiteSettings(models.Model):
         if not self.pk and SiteSettings.objects.exists():
             raise ValueError('There can be only one SiteSettings instance')
         super().save(*args, **kwargs)
+        cache.delete(SITE_SETTINGS_CACHE_KEY)
+
+    def delete(self, *args, **kwargs):
+        result = super().delete(*args, **kwargs)
+        cache.delete(SITE_SETTINGS_CACHE_KEY)
+        return result
 
     @classmethod
     def load(cls):
-        obj, created = cls.objects.get_or_create(pk=1)
+        """Return the singleton, avoiding a database hit on every request."""
+        obj = cache.get(SITE_SETTINGS_CACHE_KEY)
+        if obj is None:
+            obj, _created = cls.objects.get_or_create(pk=1)
+            cache.set(SITE_SETTINGS_CACHE_KEY, obj, 300)
         return obj

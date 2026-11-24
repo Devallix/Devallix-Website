@@ -2,7 +2,7 @@ from django.views.generic import ListView, DetailView, View
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Q
 from .models import BlogPost, BlogCategory, Tag, Comment, PostLike, BlogSubCategory, BlogSubCategory
 from .forms import CommentForm
 
@@ -26,11 +26,23 @@ class BlogListView(ListView):
         if search:
             qs = qs.filter(title__icontains=search) | qs.filter(content__icontains=search)
 
-        return qs.select_related('author', 'category').prefetch_related('tags')
+        return (
+            qs.select_related('author', 'category')
+            .prefetch_related('tags')
+            .order_by('-published_at', '-created_at')
+            .annotate(
+                likes_count_annotation=Count('likes', distinct=True),
+                approved_comments_count_annotation=Count(
+                    'comments', filter=Q(comments__is_approved=True), distinct=True
+                ),
+            )
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = BlogCategory.objects.all()
+        context['categories'] = BlogCategory.objects.annotate(
+            posts_count=Count('posts')
+        )
         context['tags'] = Tag.objects.all()
         context['search_query'] = self.request.GET.get('q', '')
         context['current_category'] = self.request.GET.get('category', '')
@@ -44,17 +56,28 @@ class BlogPostDetailView(DetailView):
     context_object_name = 'post'
 
     def get_queryset(self):
-        return BlogPost.objects.filter(status='published').select_related('author', 'category').prefetch_related('tags')
+        return (
+            BlogPost.objects.filter(status='published')
+            .select_related('author', 'category')
+            .prefetch_related('tags')
+            .annotate(
+                likes_count_annotation=Count('likes', distinct=True),
+                comments_count_annotation=Count(
+                    'comments', filter=Q(comments__is_approved=True), distinct=True
+                ),
+            )
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['comments'] = self.object.comments.filter(is_approved=True)
         context['comment_form'] = CommentForm()
         context['has_liked'] = self.object.is_liked_by(self.request)
-        context['likes_count'] = self.object.likes_count
+        context['likes_count'] = self.object.likes_count_annotation
+        context['comments_count'] = self.object.comments_count_annotation
         context['related_posts'] = BlogPost.objects.filter(
             status='published', category=self.object.category
-        ).exclude(pk=self.object.pk)[:3]
+        ).exclude(pk=self.object.pk).select_related('category')[:3]
         context['recent_articles'] = BlogPost.objects.filter(
             status='published', is_recent=True
         ).exclude(pk=self.object.pk).select_related('category').order_by('-published_at', '-created_at')[:5]
@@ -181,7 +204,7 @@ class BlogCategoryDetailView(ListView):
         self.category = get_object_or_404(BlogCategory, slug=self.kwargs['slug'])
         return BlogPost.objects.filter(
             status='published', category=self.category
-        ).select_related('author').prefetch_related('tags')
+        ).select_related('author', 'category').prefetch_related('tags')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -216,20 +239,18 @@ class DirectoryView(ListView):
     paginate_by = None
 
     def get_queryset(self):
-        useful_category = BlogCategory.objects.filter(
+        self.useful_category = BlogCategory.objects.filter(
             is_useful_websites_directory=True
         ).first()
-        if not useful_category:
+        if not self.useful_category:
             return BlogSubCategory.objects.none()
         return BlogSubCategory.objects.filter(
-            category=useful_category, is_active=True
+            category=self.useful_category, is_active=True
         ).annotate(posts_count=Count('posts')).order_by('display_order', 'name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['useful_category'] = BlogCategory.objects.filter(
-            is_useful_websites_directory=True
-        ).first()
+        context['useful_category'] = self.useful_category
         context['search_query'] = self.request.GET.get('q', '')
         return context
 

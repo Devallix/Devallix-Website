@@ -77,9 +77,9 @@
                                         {% if post.published_at %}
                                         <span><i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"M d, Y" }}</span>
                                         {% endif %}
-                                        <span><i class="fas fa-heart text-danger me-1"></i>{{ post.likes_count }}</span>
+                                        <span><i class="fas fa-heart text-danger me-1"></i>{{ post.likes_count_annotation }}</span>
                                         <a href="{% url 'dashboard:comment_list' %}?post_id={{ post.pk }}" style="color:var(--accent);text-decoration:none;" title="View comments">
-                                            <i class="fas fa-comments me-1"></i>{{ post.approved_comments_count }}
+                                            <i class="fas fa-comments me-1"></i>{{ post.approved_comments_count_annotation }}
                                         </a>
                                     </div>
                                 </div>

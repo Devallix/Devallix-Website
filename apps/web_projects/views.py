@@ -23,14 +23,14 @@ class ProjectListView(ListView):
         valid_sort = ['-created_at', 'created_at', 'name', '-display_order']
         if sort in valid_sort:
             qs = qs.order_by(sort)
-        return qs
+        return qs.prefetch_related('technologies')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['selected_tech'] = self.request.GET.get('tech', '')
         context['search_query'] = self.request.GET.get('q', '')
         context['current_sort'] = self.request.GET.get('sort', '-created_at')
-        context['total_count'] = self.get_queryset().count()
+        context['total_count'] = context['paginator'].count
         context['technologies'] = Technology.objects.all()
         return context
 
@@ -40,10 +40,13 @@ class ProjectDetailView(DetailView):
     template_name = 'web_projects/project_detail.html'
     context_object_name = 'project'
 
+    def get_queryset(self):
+        return WebProject.objects.filter(status='completed').prefetch_related('technologies')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['project_images'] = self.object.images.all()
         context['related_projects'] = WebProject.objects.filter(
             status='completed'
-        ).exclude(pk=self.object.pk)[:3]
+        ).exclude(pk=self.object.pk).prefetch_related('technologies')[:3]
         return context

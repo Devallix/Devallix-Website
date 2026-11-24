@@ -29,7 +29,7 @@ class DesignListView(ListView):
         context['search_query'] = self.request.GET.get('q', '')
         context['current_category'] = self.request.GET.get('category', '')
         context['current_sort'] = self.request.GET.get('sort', '-created_at')
-        context['total_count'] = self.get_queryset().count()
+        context['total_count'] = context['paginator'].count
         context['categories'] = GraphicDesignProject.CATEGORY_CHOICES
         return context
 

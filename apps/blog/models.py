@@ -112,6 +112,13 @@ class BlogPost(models.Model):
         ordering = ['-published_at', '-created_at']
         verbose_name = 'Blog Post'
         verbose_name_plural = 'Blog Posts'
+        indexes = [
+            models.Index(fields=['status', '-published_at'], name='blog_post_status_published_idx'),
+            models.Index(fields=['status', 'featured', '-published_at'], name='blog_post_status_featured_idx'),
+            models.Index(fields=['status', '-views_count'], name='blog_post_status_views_idx'),
+            models.Index(fields=['status', 'is_recent'], name='blog_post_recent_idx'),
+            models.Index(fields=['status', 'is_trending'], name='blog_post_trending_idx'),
+        ]
 
     def __str__(self):
         return self.title
@@ -158,6 +165,10 @@ class Comment(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+        indexes = [
+            models.Index(fields=['post', 'is_approved', '-created_at'], name='blog_comment_approved_idx'),
+            models.Index(fields=['is_approved'], name='blog_comment_status_idx'),
+        ]
 
     def __str__(self):
         return f"Comment by {self.name} on {self.post.title}"
@@ -174,6 +185,10 @@ class PostLike(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Post Like'
         verbose_name_plural = 'Post Likes'
+        indexes = [
+            models.Index(fields=['session_key'], name='blog_like_session_idx'),
+            models.Index(fields=['ip_address'], name='blog_like_ip_idx'),
+        ]
 
     def __str__(self):
         user_str = self.user.username if self.user else f"Guest ({self.session_key[:8] if self.session_key else 'anonymous'})"

@@ -22,6 +22,9 @@ class ContactMessage(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Contact Message'
         verbose_name_plural = 'Contact Messages'
+        indexes = [
+            models.Index(fields=['status', '-created_at'], name='contact_status_created_idx'),
+        ]
 
     def __str__(self):
         return f"{self.name} - {self.subject}"

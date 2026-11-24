@@ -30,6 +30,10 @@ class WebProject(models.Model):
         ordering = ['display_order', '-created_at']
         verbose_name = 'Web Project'
         verbose_name_plural = 'Web Projects'
+        indexes = [
+            models.Index(fields=['status', '-created_at'], name='web_project_status_created_idx'),
+            models.Index(fields=['featured'], name='web_project_featured_idx'),
+        ]
 
     def __str__(self):
         return self.name

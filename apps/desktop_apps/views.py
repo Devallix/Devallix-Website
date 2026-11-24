@@ -10,7 +10,7 @@ class AppListView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        qs = DesktopApplication.objects.filter(published=True)
+        qs = DesktopApplication.objects.filter(published=True).select_related('category')
         category = self.request.GET.get('category')
         platform = self.request.GET.get('platform')
         search = self.request.GET.get('q')
@@ -35,7 +35,7 @@ class AppListView(ListView):
         context['current_platform'] = self.request.GET.get('platform', '')
         context['search_query'] = self.request.GET.get('q', '')
         context['current_sort'] = self.request.GET.get('sort', '-created_at')
-        context['total_count'] = self.get_queryset().count()
+        context['total_count'] = context['paginator'].count
         return context
 
 
@@ -45,7 +45,9 @@ class AppDetailView(DetailView):
     context_object_name = 'app'
 
     def get_queryset(self):
-        return DesktopApplication.objects.filter(published=True)
+        return DesktopApplication.objects.filter(published=True).select_related(
+            'category'
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -85,7 +87,7 @@ class CategoryAppListView(AppListView):
         self.category = get_object_or_404(ApplicationCategory, slug=self.kwargs['slug'])
         qs = DesktopApplication.objects.filter(
             published=True, category=self.category
-        )
+        ).select_related('category')
         platform = self.request.GET.get('platform')
         if platform:
             qs = qs.filter(platform=platform)

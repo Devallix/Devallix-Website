@@ -81,6 +81,11 @@ class DesktopApplication(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Desktop Application'
         verbose_name_plural = 'Desktop Applications'
+        indexes = [
+            models.Index(fields=['published', 'featured'], name='desktop_app_pub_featured_idx'),
+            models.Index(fields=['published', '-created_at'], name='desktop_app_pub_created_idx'),
+            models.Index(fields=['published', '-download_count'], name='desktop_app_pub_downloads_idx'),
+        ]
 
     def __str__(self):
         return self.name

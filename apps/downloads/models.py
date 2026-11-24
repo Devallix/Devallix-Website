@@ -14,6 +14,11 @@ class Download(models.Model):
         ordering = ['-downloaded_at']
         verbose_name = 'Download'
         verbose_name_plural = 'Downloads'
+        indexes = [
+            models.Index(fields=['-downloaded_at'], name='download_date_idx'),
+            models.Index(fields=['application', '-downloaded_at'], name='download_app_date_idx'),
+            models.Index(fields=['ip_address'], name='download_ip_idx'),
+        ]
 
     def __str__(self):
         return f"Download: {self.application.name} by {self.user or self.ip_address}"

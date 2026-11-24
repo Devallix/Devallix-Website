@@ -17,6 +17,9 @@ class Testimonial(models.Model):
         ordering = ['display_order', '-created_at']
         verbose_name = 'Testimonial'
         verbose_name_plural = 'Testimonials'
+        indexes = [
+            models.Index(fields=['is_active', 'featured'], name='testimonial_active_feat_idx'),
+        ]
 
     def __str__(self):
         return f"{self.client_name} - {self.company}"

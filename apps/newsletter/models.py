@@ -12,6 +12,9 @@ class NewsletterSubscriber(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Newsletter Subscriber'
         verbose_name_plural = 'Newsletter Subscribers'
+        indexes = [
+            models.Index(fields=['is_active', '-created_at'], name='newsletter_active_created_idx'),
+        ]
 
     def __str__(self):
         return self.email

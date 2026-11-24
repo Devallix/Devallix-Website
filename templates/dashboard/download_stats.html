@@ -359,9 +359,13 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+{% endblock %}
+
 {% block page_js %}
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
     'use strict';
     const trendNode = document.getElementById('analytics-trend-data');
     const platformNode = document.getElementById('analytics-platform-data');
@@ -458,6 +462,6 @@
             }
         });
     }
-})();
+});
 </script>
 {% endblock %}

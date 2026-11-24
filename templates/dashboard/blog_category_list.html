@@ -179,7 +179,7 @@
                         <td style="color:var(--text-muted);font-size:0.85rem;">{{ subcat.category.name }}</td>
                         <td>
                             <a href="{% url 'dashboard:blog_list' %}?subcategory={{ subcat.slug }}" class="badge" style="background:rgba(0,217,255,0.12);color:var(--accent-secondary);text-decoration:none;border:1px solid rgba(0,217,255,0.25);font-size:0.8rem;padding:4px 8px;border-radius:6px;">
-                                <i class="fas fa-newspaper me-1"></i>{{ subcat.posts.count }} post{{ subcat.posts.count|pluralize }}
+                                <i class="fas fa-newspaper me-1"></i>{{ subcat.posts_count }} post{{ subcat.posts_count|pluralize }}
                             </a>
                         </td>
                         <td style="color:var(--text-dim);">{{ subcat.display_order }}</td>

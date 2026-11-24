@@ -296,7 +296,7 @@
                     <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-calendar me-1"></i>{{ post.published_at|date:"M d, Y" }}</span>
                     <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-eye me-1"></i>{{ post.views_count|intcomma }} views</span>
                     <span style="color:var(--text-dim);font-size:0.85rem;"><i class="fas fa-heart text-danger me-1"></i><span id="header-likes-count">{{ likes_count }}</span> likes</span>
-                    <a href="#comments-section" style="color:var(--text-dim);font-size:0.85rem;text-decoration:none;"><i class="fas fa-comments text-info me-1"></i><span id="header-comments-count">{{ comments.count }}</span> comments</a>
+                    <a href="#comments-section" style="color:var(--text-dim);font-size:0.85rem;text-decoration:none;"><i class="fas fa-comments text-info me-1"></i><span id="header-comments-count">{{ comments_count }}</span> comments</a>
                 </div>
                 <h1 class="fw-bold" style="font-size:2.2rem;">{{ post.title }}</h1>
             </div>
@@ -380,7 +380,7 @@
                         <h4 class="fw-bold mb-0 d-flex align-items-center" style="font-size:1.35rem;">
                             <i class="fas fa-comments me-2" style="color:var(--accent-primary);"></i>
                             Comments &amp; Feedback
-                            <span class="badge ms-2" id="comments-count-badge" style="background:rgba(182,255,0,0.12);color:var(--accent-primary);border:1px solid rgba(182,255,0,0.25);font-size:0.85rem;padding:4px 10px;border-radius:20px;">{{ comments.count }}</span>
+                            <span class="badge ms-2" id="comments-count-badge" style="background:rgba(182,255,0,0.12);color:var(--accent-primary);border:1px solid rgba(182,255,0,0.25);font-size:0.85rem;padding:4px 10px;border-radius:20px;">{{ comments_count }}</span>
                         </h4>
                     </div>
 

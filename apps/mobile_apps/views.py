@@ -22,14 +22,14 @@ class MobileAppListView(ListView):
         valid_sort = ['-created_at', 'created_at', 'name', '-display_order']
         if sort in valid_sort:
             qs = qs.order_by(sort)
-        return qs
+        return qs.prefetch_related('technologies')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('q', '')
         context['current_platform'] = self.request.GET.get('platform', '')
         context['current_sort'] = self.request.GET.get('sort', '-created_at')
-        context['total_count'] = self.get_queryset().count()
+        context['total_count'] = context['paginator'].count
         return context
 
 
@@ -39,11 +39,11 @@ class MobileAppDetailView(DetailView):
     context_object_name = 'app'
 
     def get_queryset(self):
-        return MobileApp.objects.filter(status='completed')
+        return MobileApp.objects.filter(status='completed').prefetch_related('technologies')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['related_apps'] = MobileApp.objects.filter(
             status='completed'
-        ).exclude(pk=self.object.pk)[:3]
+        ).exclude(pk=self.object.pk).prefetch_related('technologies')[:3]
         return context

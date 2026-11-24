@@ -41,6 +41,10 @@ class MobileApp(models.Model):
         ordering = ['display_order', '-created_at']
         verbose_name = 'Mobile Application'
         verbose_name_plural = 'Mobile Applications'
+        indexes = [
+            models.Index(fields=['status', '-display_order'], name='mobile_app_status_order_idx'),
+            models.Index(fields=['featured'], name='mobile_app_featured_idx'),
+        ]
 
     def __str__(self):
         return self.name

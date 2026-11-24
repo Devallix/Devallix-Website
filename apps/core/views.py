@@ -123,42 +123,43 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['featured_apps'] = DesktopApplication.objects.filter(
-            featured=True, published=True
+
+        apps = list(DesktopApplication.objects.filter(published=True))
+        projects = list(WebProject.objects.prefetch_related('technologies'))
+
+        context['featured_apps'] = [app for app in apps if app.featured][:6]
+        context['latest_apps'] = sorted(
+            apps, key=lambda app: app.created_at, reverse=True
         )[:6]
-        context['latest_apps'] = DesktopApplication.objects.filter(
-            published=True
-        ).order_by('-created_at')[:6]
-        context['featured_projects'] = WebProject.objects.filter(
-            featured=True
+        context['featured_projects'] = [project for project in projects if project.featured][:6]
+        context['latest_projects'] = sorted(
+            (project for project in projects if project.status == 'completed'),
+            key=lambda project: project.created_at,
+            reverse=True,
         )[:6]
-        context['latest_projects'] = WebProject.objects.filter(
-            status='completed'
-        ).order_by('-created_at')[:6]
         context['featured_mobile_apps'] = MobileApp.objects.filter(
             featured=True, status='completed'
-        )[:6]
+        ).prefetch_related('technologies')[:6]
         context['featured_designs'] = GraphicDesignProject.objects.filter(
             featured=True, published=True
         )[:6]
         context['useful_website_subcategories'] = BlogSubCategory.objects.filter(
             is_active=True,
             category__is_useful_websites_directory=True
-        ).annotate(posts_count=Count('posts')).order_by('display_order', 'name')[:4]
+        ).select_related('category').annotate(
+            posts_count=Count('posts')
+        ).order_by('display_order', 'name')[:4]
         context['testimonials'] = Testimonial.objects.filter(
             featured=True, is_active=True
         )[:5]
         context['skills'] = Skill.objects.filter(is_featured=True)[:12]
-        context['skill_categories'] = SkillCategory.objects.all()
         context['featured_posts'] = BlogPost.objects.filter(
             status='published', featured=True
         ).select_related('author', 'category').prefetch_related('tags')[:4]
         context['stats'] = {
-            'apps_built': DesktopApplication.objects.filter(published=True).count(),
-            'web_projects': WebProject.objects.filter(status='completed').count(),
-            'total_downloads': sum(
-                app.download_count for app in DesktopApplication.objects.filter(published=True)
-            ),
+            'apps_built': len(apps),
+            'web_projects': sum(1 for project in projects if project.status == 'completed'),
+            'total_downloads': sum(app.download_count for app in apps),
         }
         return context
 

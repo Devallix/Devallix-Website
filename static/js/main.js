@@ -1,21 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    AOS.init({
-        duration: 800,
-        easing: 'ease-in-out',
-        once: true,
-        offset: 50,
-    });
-
-    const loader = document.getElementById('pageLoader');
-    if (loader) {
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                loader.classList.add('hidden');
-            }, 500);
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 50,
         });
-        setTimeout(function() {
-            loader.classList.add('hidden');
-        }, 3000);
     }
 
     const backToTop = document.getElementById('backToTop');
@@ -243,7 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
         animateParticles();
     }
 
-    const swipers = document.querySelectorAll('.swiper');
+    const swipers = typeof Swiper !== 'undefined'
+        ? document.querySelectorAll('.swiper')
+        : [];
     swipers.forEach(function(el) {
         new Swiper(el, {
             loop: true,
