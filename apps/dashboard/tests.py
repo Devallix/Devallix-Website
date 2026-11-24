@@ -1,7 +1,15 @@
+from datetime import timedelta
+
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from apps.blog.models import BlogPost, BlogCategory
+from django.utils import timezone
+
+from apps.blog.models import BlogPost, BlogCategory, Comment, PostLike
+from apps.contact.models import ContactMessage
+from apps.desktop_apps.models import DesktopApplication
+from apps.downloads.models import Download
+from apps.newsletter.models import NewsletterSubscriber
 
 User = get_user_model()
 
@@ -238,3 +246,89 @@ class BlogCategoryDashboardTests(TestCase):
         # Sections should be completely hidden when 0 articles are marked
         self.assertNotContains(response, 'Trending / Must Read')
         self.assertNotContains(response, 'Recent Articles')
+
+
+class DownloadStatsDashboardTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.staff_user = User.objects.create_user(
+            username='analytics_staff',
+            email='analytics@example.com',
+            password='testpassword123',
+            is_staff=True,
+        )
+        self.regular_user = User.objects.create_user(
+            username='analytics_regular',
+            email='regular@example.com',
+            password='testpassword123',
+            is_staff=False,
+        )
+        self.url = reverse('dashboard:download_stats')
+        self.client.force_login(self.staff_user)
+
+    def test_empty_analytics_page_renders_explicit_zero_states(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_downloads'], 0)
+        self.assertEqual(response.context['month_downloads'], 0)
+        self.assertEqual(response.context['app_download_stats'], [])
+        self.assertEqual(response.context['platform_data'], [])
+        self.assertContains(response, 'Site Analytics')
+        self.assertContains(response, 'No downloads recorded yet')
+        self.assertContains(response, 'Portfolio at a Glance')
+
+    def test_analytics_uses_real_site_records(self):
+        app = DesktopApplication.objects.create(
+            name='Analytics App',
+            short_description='Test app',
+            description='Test app description',
+            platform='windows',
+        )
+        old_download = Download.objects.create(
+            application=app, ip_address='198.51.100.10'
+        )
+        Download.objects.filter(pk=old_download.pk).update(
+            downloaded_at=timezone.now() - timedelta(days=45)
+        )
+        Download.objects.create(application=app, ip_address='198.51.100.11')
+
+        post = BlogPost.objects.create(
+            title='Analytics Post',
+            author=self.staff_user,
+            content='Post content',
+            status='published',
+            views_count=42,
+        )
+        Comment.objects.create(post=post, name='Reader', body='Great article')
+        PostLike.objects.create(post=post)
+        NewsletterSubscriber.objects.create(email='reader@example.com', is_active=True)
+        ContactMessage.objects.create(
+            name='Visitor',
+            email='visitor@example.com',
+            subject='Hello',
+            message='Hello there',
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_downloads'], 2)
+        self.assertEqual(response.context['month_downloads'], 1)
+        self.assertEqual(response.context['unique_downloaders'], 2)
+        self.assertEqual(response.context['app_download_total'], 2)
+        self.assertEqual(response.context['app_download_stats'][0]['share'], 100.0)
+        self.assertEqual(response.context['trend_data'][-1]['count'], 1)
+        self.assertEqual(response.context['total_blog_views'], 42)
+        self.assertEqual(response.context['active_subscribers'], 1)
+        self.assertEqual(response.context['total_messages'], 1)
+        self.assertEqual(response.context['top_posts'][0].analytics_comments, 1)
+        self.assertEqual(response.context['top_posts'][0].analytics_likes, 1)
+        self.assertContains(response, 'Analytics App')
+        self.assertContains(response, 'Analytics Post')
+        self.assertContains(response, '100.0%')
+
+    def test_analytics_is_staff_only(self):
+        self.client.force_login(self.regular_user)
+        response = self.client.get(self.url)
+        self.assertNotEqual(response.status_code, 200)

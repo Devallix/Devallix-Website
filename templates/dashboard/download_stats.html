@@ -1,123 +1,252 @@
 {% extends 'dashboard/base_dashboard.html' %}
 {% load humanize %}
-{% block title %}Download Statistics{% endblock %}
+{% block title %}Site Analytics{% endblock %}
 
 {% block content %}
-<div class="page-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+{{ trend_data|json_script:"analytics-trend-data" }}
+{{ platform_data|json_script:"analytics-platform-data" }}
+
+<div class="page-section analytics-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
         <div>
-            <h4 class="page-title">Download Statistics</h4>
-            <p style="color:var(--text-dim);margin:0;">Track your application downloads.</p>
+            <h4 class="page-title mb-1">Site Analytics</h4>
+            <p class="analytics-subtitle mb-0">Real activity from your portfolio — downloads, content, audience and engagement.</p>
+        </div>
+        <span class="analytics-live-badge"><i class="fas fa-circle me-2"></i>Live database data</span>
+    </div>
+
+    <!-- Headline metrics -->
+    <div class="analytics-kpi-grid mb-4">
+        <div class="analytics-kpi is-accent">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-download"></i></span>
+                <span class="analytics-kpi-tag">All time</span>
+            </div>
+            <div class="analytics-kpi-value">{{ total_downloads|intcomma }}</div>
+            <div class="analytics-kpi-label">Tracked Downloads</div>
+            <div class="analytics-kpi-foot">From {{ published_apps }} published app{{ published_apps|pluralize }}</div>
+        </div>
+
+        <div class="analytics-kpi is-cyan">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-calendar-day"></i></span>
+                {% if month_change != None %}
+                <span class="analytics-delta {% if month_change > 0 %}is-up{% elif month_change < 0 %}is-down{% else %}is-flat{% endif %}">
+                    {% if month_change > 0 %}<i class="fas fa-arrow-up me-1"></i>+{{ month_change|floatformat:1 }}%
+                    {% elif month_change < 0 %}<i class="fas fa-arrow-down me-1"></i>{{ month_change|floatformat:1 }}%
+                    {% else %}<i class="fas fa-minus me-1"></i>0%{% endif %}
+                </span>
+                {% else %}
+                <span class="analytics-delta is-flat">No baseline</span>
+                {% endif %}
+            </div>
+            <div class="analytics-kpi-value">{{ month_downloads|intcomma }}</div>
+            <div class="analytics-kpi-label">Downloads · 30 Days</div>
+            <div class="analytics-kpi-foot">vs. previous 30 days</div>
+        </div>
+
+        <div class="analytics-kpi is-green">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-users"></i></span>
+                <span class="analytics-kpi-tag">Unique</span>
+            </div>
+            <div class="analytics-kpi-value">{{ unique_downloaders|intcomma }}</div>
+            <div class="analytics-kpi-label">Distinct Downloaders</div>
+            <div class="analytics-kpi-foot">{{ registered_downloaders }} signed-in visitor{{ registered_downloaders|pluralize }}</div>
+        </div>
+
+        <div class="analytics-kpi is-amber">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-eye"></i></span>
+                <span class="analytics-kpi-tag">Content</span>
+            </div>
+            <div class="analytics-kpi-value">{{ total_blog_views|intcomma }}</div>
+            <div class="analytics-kpi-label">Article Views</div>
+            <div class="analytics-kpi-foot">Across {{ published_posts }} published post{{ published_posts|pluralize }}</div>
+        </div>
+
+        <div class="analytics-kpi is-violet">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-envelope-open-text"></i></span>
+                <span class="analytics-kpi-tag">Audience</span>
+            </div>
+            <div class="analytics-kpi-value">{{ active_subscribers|intcomma }}</div>
+            <div class="analytics-kpi-label">Active Subscribers</div>
+            <div class="analytics-kpi-foot">+{{ new_subscribers_30d }} in the last 30 days</div>
+        </div>
+
+        <div class="analytics-kpi is-rose">
+            <div class="analytics-kpi-top">
+                <span class="analytics-kpi-icon"><i class="fas fa-comments"></i></span>
+                <span class="analytics-kpi-tag">Inbox</span>
+            </div>
+            <div class="analytics-kpi-value">{{ total_messages|intcomma }}</div>
+            <div class="analytics-kpi-label">Contact Messages</div>
+            <div class="analytics-kpi-foot">{{ unread_messages }} unread · {{ messages_30d }} this month</div>
         </div>
     </div>
 
+    <!-- Content at a glance -->
+    <div class="dashboard-card analytics-content-strip mb-4">
+        <div class="analytics-strip-head">
+            <div>
+                <h6 class="fw-bold mb-1"><i class="fas fa-layer-group me-2" style="color:var(--accent);"></i>Portfolio at a Glance</h6>
+                <p class="analytics-subtitle mb-0">Everything currently published or recorded on the site.</p>
+            </div>
+            <a href="{% url 'dashboard:dashboard_home' %}" class="analytics-text-link">Overview <i class="fas fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="analytics-mini-grid">
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-accent"><i class="fas fa-desktop"></i></span>
+                <strong>{{ content_counts.desktop_apps|intcomma }}</strong>
+                <small>Desktop apps</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-cyan"><i class="fas fa-globe"></i></span>
+                <strong>{{ content_counts.web_projects|intcomma }}</strong>
+                <small>Web projects</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-green"><i class="fas fa-mobile-alt"></i></span>
+                <strong>{{ content_counts.mobile_apps|intcomma }}</strong>
+                <small>Mobile apps</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-amber"><i class="fas fa-palette"></i></span>
+                <strong>{{ content_counts.graphic_designs|intcomma }}</strong>
+                <small>Designs</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-violet"><i class="fas fa-newspaper"></i></span>
+                <strong>{{ published_posts|intcomma }}</strong>
+                <small>Published posts</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-rose"><i class="fas fa-comment-dots"></i></span>
+                <strong>{{ total_comments|intcomma }}</strong>
+                <small>Comments · {{ pending_comments }} pending</small>
+            </div>
+            <div class="analytics-mini">
+                <span class="analytics-mini-icon is-accent"><i class="fas fa-heart"></i></span>
+                <strong>{{ total_likes|intcomma }}</strong>
+                <small>Post likes</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download charts -->
     <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
-                    <i class="fas fa-download" style="color:var(--accent);"></i>
-                </div>
-                <div class="card-value">{{ total_downloads|intcomma }}</div>
-                <div class="card-label">Total Downloads</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
-                    <i class="fas fa-desktop" style="color:var(--accent-secondary);"></i>
-                </div>
-                <div class="card-value">{{ total_apps }}</div>
-                <div class="card-label">Total Applications</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(40,167,69,0.1);">
-                    <i class="fas fa-calendar-day" style="color:#28a745;"></i>
-                </div>
-                <div class="card-value">{{ today_downloads|intcomma }}</div>
-                <div class="card-label">Downloads Today</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(255,193,7,0.1);">
-                    <i class="fas fa-calendar-week" style="color:#ffc107;"></i>
-                </div>
-                <div class="card-value">{{ week_downloads|intcomma }}</div>
-                <div class="card-label">This Week</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(182,255,0,0.1);">
-                    <i class="fas fa-calendar-alt" style="color:var(--accent);"></i>
-                </div>
-                <div class="card-value">{{ month_downloads|intcomma }}</div>
-                <div class="card-label">This Month</div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background:rgba(0,217,255,0.1);">
-                    <i class="fas fa-trophy" style="color:var(--accent-secondary);"></i>
-                </div>
-                <div class="card-value">{{ most_downloaded.name|default:"N/A" }}</div>
-                <div class="card-label">Most Downloaded</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
         <div class="col-xl-8">
-            <div class="dashboard-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--accent);"></i>Downloads by Application</h6>
+            <div class="dashboard-card analytics-chart-card h-100">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-1"><i class="fas fa-chart-line me-2" style="color:var(--accent);"></i>Download Trend</h6>
+                        <p class="analytics-subtitle mb-0">Tracked download events over the selected window.</p>
+                    </div>
+                    <div class="analytics-range" role="group" aria-label="Chart range">
+                        {% for days in trend_range_choices %}
+                        <a href="?range={{ days }}" class="{% if days == trend_days %}active{% endif %}">{{ days }}d</a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if total_downloads %}
+                <div class="analytics-chart"><canvas id="downloadTrendChart"></canvas></div>
+                {% else %}
+                <div class="analytics-empty">
+                    <span class="analytics-empty-icon"><i class="fas fa-chart-line"></i></span>
+                    <strong>No downloads recorded yet</strong>
+                    <p>Downloads will appear here when a visitor uses a tracked download link on a published app.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="dashboard-card analytics-chart-card h-100">
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-1"><i class="fas fa-chart-pie me-2" style="color:var(--accent-secondary);"></i>Platform Split</h6>
+                    <p class="analytics-subtitle mb-0">Where your downloads are coming from.</p>
+                </div>
+                {% if platform_data %}
+                <div class="analytics-donut-wrap"><canvas id="platformChart"></canvas></div>
+                <div class="analytics-legend mt-3">
+                    {% for platform in platform_data %}
+                    <div class="analytics-legend-row">
+                        <span class="analytics-legend-dot" style="background:{% cycle '#B6FF00' '#00D9FF' '#28a745' '#ffc107' '#ff6b6b' %}"></span>
+                        <span class="analytics-legend-label">{{ platform.label }}</span>
+                        <span class="analytics-legend-value">{{ platform.count|intcomma }} <small>· {{ platform.share|floatformat:1 }}%</small></span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="analytics-empty analytics-empty--compact">
+                    <span class="analytics-empty-icon"><i class="fas fa-chart-pie"></i></span>
+                    <strong>No platform data yet</strong>
+                    <p>Platform shares will appear after the first tracked download.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Application breakdown -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <div class="dashboard-card h-100">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-1"><i class="fas fa-trophy me-2" style="color:var(--accent);"></i>Downloads by Application</h6>
+                        <p class="analytics-subtitle mb-0">
+                            {% if most_downloaded %}
+                            Top performer: <span style="color:var(--accent);">{{ most_downloaded.name }}</span> · {{ most_downloaded.downloads|intcomma }}
+                            {% else %}
+                            Lifetime counter total: {{ app_counter_total|intcomma }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="{% url 'dashboard:app_list' %}" class="analytics-text-link">Manage apps <i class="fas fa-arrow-right ms-1"></i></a>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dashboard mb-0">
+                    <table class="table table-dashboard analytics-table mb-0">
                         <thead>
                             <tr>
                                 <th>Application</th>
                                 <th>Platform</th>
-                                <th>Downloads</th>
-                                <th>% of Total</th>
+                                <th class="text-end">Downloads</th>
+                                <th style="width:150px;">Share</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for app in app_download_stats %}
+                            {% for item in app_download_stats %}
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        {% if app.logo %}
-                                        <img src="{{ app.logo.url }}" alt="{{ app.name }}" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
+                                        {% if item.logo %}
+                                        <img src="{{ item.logo.url }}" alt="{{ item.name }}" class="analytics-app-logo">
                                         {% else %}
-                                        <div style="width:32px;height:32px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                            <i class="fas fa-cube" style="color:var(--bg-primary);font-size:0.8rem;"></i>
-                                        </div>
+                                        <span class="analytics-app-logo analytics-app-logo--placeholder"><i class="fas fa-cube"></i></span>
                                         {% endif %}
-                                        <a href="{% url 'dashboard:app_detail' pk=app.pk %}" style="font-weight:600;color:var(--text-white);">{{ app.name }}</a>
+                                        <div class="min-w-0">
+                                            <a href="{% url 'dashboard:app_detail' pk=item.pk %}" class="analytics-app-name">{{ item.name }}</a>
+                                            {% if not item.published %}<span class="analytics-tag-muted">Draft</span>{% endif %}
+                                            {% if item.counter_downloads != item.downloads %}
+                                            <div class="analytics-cell-note">Lifetime counter: {{ item.counter_downloads|intcomma }}</div>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </td>
-                                <td><span style="color:var(--accent-secondary);font-weight:500;">{{ app.get_platform_display }}</span></td>
-                                <td><span style="color:var(--accent);font-weight:600;">{{ app.download_count|intcomma }}</span></td>
+                                <td><span class="analytics-platform-pill">{{ item.platform }}</span></td>
+                                <td class="text-end"><span class="analytics-number">{{ item.downloads|intcomma }}</span></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="flex:1;max-width:100px;height:6px;background:var(--bg-primary);border-radius:3px;overflow:hidden;">
-                                            <div style="width:{% if total_downloads %}{{ app.download_count|floatformat:0 }}%{% else %}0%{% endif %};height:100%;background:var(--accent);border-radius:3px;"></div>
-                                        </div>
-                                        <span style="color:var(--text-dim);font-size:0.8rem;">
-                                            {% if total_downloads %}{{ app.download_count|floatformat:1 }}%{% else %}0%{% endif %}
-                                        </span>
+                                        <div class="analytics-progress"><span style="width:{{ item.share|floatformat:1 }}%;"></span></div>
+                                        <span class="analytics-share">{{ item.share|floatformat:1 }}%</span>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center" style="color:var(--text-dim);padding:2rem;">No download data available.</td>
+                                <td colspan="4" class="text-center analytics-table-empty">No applications yet. <a href="{% url 'dashboard:app_create' %}">Create your first app</a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -127,30 +256,208 @@
         </div>
 
         <div class="col-xl-4">
-            <div class="dashboard-card">
+            <div class="dashboard-card h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0"><i class="fas fa-clock me-2" style="color:var(--accent-secondary);"></i>Recent Downloads</h6>
-                </div>
-                {% for download in recent_downloads %}
-                <div class="d-flex justify-content-between align-items-center py-2" {% if not forloop.last %}style="border-bottom:1px solid var(--border-color);"{% endif %}>
-                    <div class="d-flex align-items-center gap-2" style="min-width:0;">
-                        <div style="width:28px;height:28px;border-radius:6px;background:rgba(182,255,0,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas fa-download" style="color:var(--accent);font-size:0.7rem;"></i>
-                        </div>
-                        <div style="min-width:0;">
-                            <div style="font-weight:500;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ download.application.name }}</div>
-                            <div style="color:var(--text-dim);font-size:0.75rem;">{{ download.downloaded_at|timesince }} ago</div>
-                        </div>
+                    <div>
+                        <h6 class="fw-bold mb-1"><i class="fas fa-clock me-2" style="color:var(--accent-secondary);"></i>Recent Downloads</h6>
+                        <p class="analytics-subtitle mb-0">Latest tracked events.</p>
                     </div>
                 </div>
+                {% for download in recent_downloads %}
+                <div class="analytics-download-row" {% if not forloop.last %}style="border-bottom:1px solid var(--border-color);"{% endif %}>
+                    <span class="analytics-download-icon"><i class="fas fa-download"></i></span>
+                    <div class="min-w-0 flex-grow-1">
+                        <div class="analytics-row-title">{{ download.application.name }}</div>
+                        <div class="analytics-row-meta">
+                            {% if download.version %}v{{ download.version.version_number }} · {% endif %}
+                            {% if download.user %}{{ download.user.username }}{% elif download.ip_address %}{{ download.ip_address }}{% else %}Anonymous{% endif %}
+                        </div>
+                    </div>
+                    <span class="analytics-time">{{ download.downloaded_at|timesince }} ago</span>
+                </div>
                 {% empty %}
-                <div class="text-center" style="color:var(--text-dim);padding:2rem;">
-                    <i class="fas fa-download" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
-                    No downloads recorded yet.
+                <div class="analytics-empty analytics-empty--compact">
+                    <span class="analytics-empty-icon"><i class="fas fa-download"></i></span>
+                    <strong>No downloads recorded yet</strong>
+                    <p>Tracked downloads will show up here in real time.</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
+
+    <!-- Content engagement -->
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="dashboard-card h-100">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h6 class="fw-bold mb-1"><i class="fas fa-fire me-2" style="color:var(--accent);"></i>Top Performing Articles</h6>
+                        <p class="analytics-subtitle mb-0">Ranked by recorded page views.</p>
+                    </div>
+                    <a href="{% url 'dashboard:blog_list' %}" class="analytics-text-link">All posts <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dashboard analytics-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Article</th>
+                                <th class="text-end">Views</th>
+                                <th class="text-end">Comments</th>
+                                <th class="text-end">Likes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in top_posts %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'dashboard:blog_edit' pk=post.pk %}" class="analytics-app-name">{{ post.title }}</a>
+                                    <div class="analytics-cell-note">{{ post.get_status_display }}</div>
+                                </td>
+                                <td class="text-end"><span class="analytics-number">{{ post.views_count|intcomma }}</span></td>
+                                <td class="text-end">{{ post.analytics_comments|intcomma }}</td>
+                                <td class="text-end">{{ post.analytics_likes|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center analytics-table-empty">No published articles yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="dashboard-card h-100">
+                <div class="mb-3">
+                    <h6 class="fw-bold mb-1"><i class="fas fa-wave-square me-2" style="color:var(--accent-secondary);"></i>Recent Activity</h6>
+                    <p class="analytics-subtitle mb-0">A live feed of portfolio events.</p>
+                </div>
+                {% for item in recent_activity %}
+                <a href="{{ item.url }}" class="analytics-activity-row">
+                    <span class="analytics-activity-icon is-{{ item.color }}"><i class="fas {{ item.icon }}"></i></span>
+                    <span class="min-w-0 flex-grow-1">
+                        <span class="analytics-row-title d-block">{{ item.title }}</span>
+                        <span class="analytics-row-meta d-block">{{ item.description }} · {{ item.timestamp|timesince }} ago</span>
+                    </span>
+                    <i class="fas fa-chevron-right analytics-activity-arrow"></i>
+                </a>
+                {% empty %}
+                <div class="analytics-empty analytics-empty--compact">
+                    <span class="analytics-empty-icon"><i class="fas fa-wave-square"></i></span>
+                    <strong>No activity yet</strong>
+                    <p>New content, messages, subscribers and downloads will appear here.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <p class="analytics-footnote mb-0"><i class="fas fa-circle-info me-1"></i> All figures are calculated directly from your database records — no sample or placeholder data.</p>
 </div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+(function () {
+    'use strict';
+    const trendNode = document.getElementById('analytics-trend-data');
+    const platformNode = document.getElementById('analytics-platform-data');
+    const trendData = trendNode ? JSON.parse(trendNode.textContent || '[]') : [];
+    const platformData = platformNode ? JSON.parse(platformNode.textContent || '[]') : [];
+    const tickColor = '#6C7380';
+    const gridColor = 'rgba(255, 255, 255, 0.06)';
+
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    const trendCanvas = document.getElementById('downloadTrendChart');
+    if (trendCanvas) {
+        new Chart(trendCanvas, {
+            type: 'line',
+            data: {
+                labels: trendData.map(function (item) { return item.label; }),
+                datasets: [{
+                    label: 'Downloads',
+                    data: trendData.map(function (item) { return item.count; }),
+                    borderColor: '#B6FF00',
+                    backgroundColor: 'rgba(182, 255, 0, 0.12)',
+                    pointBackgroundColor: '#B6FF00',
+                    pointBorderColor: '#1F242B',
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function (items) { return trendData[items[0].dataIndex].date; },
+                            label: function (context) {
+                                const n = context.parsed.y;
+                                return ' ' + n + ' download' + (n === 1 ? '' : 's');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, maxTicksLimit: 8 }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor, precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    const platformCanvas = document.getElementById('platformChart');
+    if (platformCanvas) {
+        const colors = ['#B6FF00', '#00D9FF', '#28a745', '#ffc107', '#ff6b6b'];
+        new Chart(platformCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: platformData.map(function (item) { return item.label; }),
+                datasets: [{
+                    data: platformData.map(function (item) { return item.count; }),
+                    backgroundColor: colors,
+                    borderColor: '#1F242B',
+                    borderWidth: 3,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return ' ' + context.label + ': ' + context.parsed +
+                                    ' (' + platformData[context.dataIndex].share + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

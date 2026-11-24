@@ -1,20 +1,25 @@
+from collections import defaultdict
+from datetime import timedelta
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import (
     TemplateView, ListView, CreateView, UpdateView, DeleteView, FormView
 )
 from django.db.models import Count, Sum, Q
+from django.db.models.functions import TruncDate
 from django.http import JsonResponse, HttpResponse
 from apps.desktop_apps.models import DesktopApplication, ApplicationVersion, ApplicationCategory, Screenshot
 from apps.web_projects.models import WebProject
 from apps.mobile_apps.models import MobileApp
 from apps.graphic_design.models import GraphicDesignProject
 from apps.portfolio.models import Skill, SkillCategory, Technology
-from apps.blog.models import BlogPost, BlogCategory, Tag, Comment, BlogSubCategory
+from apps.blog.models import BlogPost, BlogCategory, Tag, Comment, BlogSubCategory, PostLike
 from apps.contact.models import ContactMessage
 from apps.testimonials.models import Testimonial
 from apps.newsletter.models import NewsletterSubscriber, Newsletter
@@ -32,6 +37,25 @@ class DashboardLoginRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_staff
+
+
+def _percent_change(current, previous):
+    """Return a signed percentage change, or None when there is no baseline."""
+    if previous <= 0:
+        return 100.0 if current > 0 else None
+    return round(((current - previous) / previous) * 100, 1)
+
+
+def _activity_item(kind, icon, title, description, timestamp, url, color):
+    return {
+        'kind': kind,
+        'icon': icon,
+        'title': title,
+        'description': description,
+        'timestamp': timestamp,
+        'url': url,
+        'color': color,
+    }
 
 
 class DashboardHomeView(DashboardLoginRequiredMixin, TemplateView):
@@ -632,17 +656,224 @@ class CategoryDeleteView(DashboardLoginRequiredMixin, DeleteView):
 
 
 class DownloadStatsView(DashboardLoginRequiredMixin, TemplateView):
+    """Site-wide analytics built from recorded portfolio activity."""
+
     template_name = 'dashboard/download_stats.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_downloads'] = Download.objects.count()
-        context['app_downloads'] = DesktopApplication.objects.filter(
-            published=True
-        ).order_by('-download_count')[:10]
-        context['recent_downloads'] = Download.objects.select_related(
-            'application', 'version'
-        ).all()[:20]
+
+        today = timezone.localdate()
+        yesterday = today - timedelta(days=1)
+        week_start = today - timedelta(days=6)
+        previous_week_end = week_start - timedelta(days=1)
+        previous_week_start = week_start - timedelta(days=7)
+        month_start = today - timedelta(days=29)
+        previous_month_end = month_start - timedelta(days=1)
+        previous_month_start = month_start - timedelta(days=30)
+
+        try:
+            trend_days = int(self.request.GET.get('range', 14))
+        except (TypeError, ValueError):
+            trend_days = 14
+        trend_days = trend_days if trend_days in {7, 14, 30} else 14
+        trend_start = today - timedelta(days=trend_days - 1)
+
+        downloads_qs = Download.objects.all()
+        total_downloads = downloads_qs.count()
+        today_downloads = downloads_qs.filter(downloaded_at__date=today).count()
+        yesterday_downloads = downloads_qs.filter(downloaded_at__date=yesterday).count()
+        week_downloads = downloads_qs.filter(downloaded_at__date__gte=week_start).count()
+        previous_week_downloads = downloads_qs.filter(
+            downloaded_at__date__range=(previous_week_start, previous_week_end)
+        ).count()
+        month_downloads = downloads_qs.filter(downloaded_at__date__gte=month_start).count()
+        previous_month_downloads = downloads_qs.filter(
+            downloaded_at__date__range=(previous_month_start, previous_month_end)
+        ).count()
+        unique_downloaders = downloads_qs.exclude(
+            ip_address__isnull=True
+        ).values('ip_address').distinct().count()
+        registered_downloaders = downloads_qs.filter(user__isnull=False).values(
+            'user'
+        ).distinct().count()
+
+        # Application counters are kept for older installs; recorded Download
+        # rows are the source of truth for time-based analytics.
+        app_counter_total = DesktopApplication.objects.aggregate(
+            total=Sum('download_count')
+        )['total'] or 0
+
+        apps = DesktopApplication.objects.annotate(
+            recorded_downloads=Count('downloads')
+        )
+        app_stats = []
+        for app in apps:
+            downloads = app.recorded_downloads or app.download_count
+            app_stats.append({
+                'pk': app.pk,
+                'name': app.name,
+                'logo': app.logo,
+                'platform_key': app.platform,
+                'platform': app.get_platform_display(),
+                'published': app.published,
+                'downloads': downloads,
+                'recorded_downloads': app.recorded_downloads,
+                'counter_downloads': app.download_count,
+            })
+        app_download_total = sum(item['downloads'] for item in app_stats)
+        for item in app_stats:
+            item['share'] = round(
+                (item['downloads'] / app_download_total) * 100, 1
+            ) if app_download_total else 0.0
+        app_stats.sort(key=lambda item: (-item['downloads'], item['name'].lower()))
+
+        platform_totals = defaultdict(int)
+        for item in app_stats:
+            platform_totals[item['platform_key']] += item['downloads']
+        platform_labels = dict(DesktopApplication.PLATFORM_CHOICES)
+        platform_data = [
+            {
+                'key': key,
+                'label': platform_labels.get(key, key.replace('_', ' ').title()),
+                'count': count,
+                'share': round((count / app_download_total) * 100, 1)
+                if app_download_total else 0.0,
+            }
+            for key, count in platform_totals.items()
+            if count > 0
+        ]
+        platform_data.sort(key=lambda item: (-item['count'], item['label']))
+
+        daily_counts = defaultdict(int)
+        for row in (
+            downloads_qs.filter(downloaded_at__date__gte=trend_start)
+            .annotate(day=TruncDate('downloaded_at'))
+            .values('day')
+            .annotate(count=Count('id'))
+            .order_by('day')
+        ):
+            daily_counts[row['day']] += row['count']
+        trend_data = []
+        for offset in range(trend_days):
+            day = trend_start + timedelta(days=offset)
+            trend_data.append({
+                'date': day.isoformat(),
+                'label': day.strftime('%b %d'),
+                'count': daily_counts.get(day, 0),
+            })
+
+        recent_downloads = list(
+            downloads_qs.select_related('application', 'version', 'user')[:8]
+        )
+
+        # Content, audience and engagement metrics from the rest of the site.
+        published_posts_qs = BlogPost.objects.filter(status='published')
+        published_posts = published_posts_qs.count()
+        total_blog_views = published_posts_qs.aggregate(
+            total=Sum('views_count')
+        )['total'] or 0
+        total_comments = Comment.objects.count()
+        approved_comments = Comment.objects.filter(is_approved=True).count()
+        pending_comments = Comment.objects.filter(is_approved=False).count()
+        total_likes = PostLike.objects.count()
+        active_subscribers = NewsletterSubscriber.objects.filter(is_active=True).count()
+        new_subscribers_30d = NewsletterSubscriber.objects.filter(
+            created_at__date__gte=month_start
+        ).count()
+        total_messages = ContactMessage.objects.count()
+        unread_messages = ContactMessage.objects.filter(status='unread').count()
+        messages_30d = ContactMessage.objects.filter(
+            created_at__date__gte=month_start
+        ).count()
+
+        top_posts = list(
+            published_posts_qs.annotate(
+                analytics_comments=Count(
+                    'comments', filter=Q(comments__is_approved=True), distinct=True
+                ),
+                analytics_likes=Count('likes', distinct=True),
+            ).order_by('-views_count', '-published_at')[:5]
+        )
+
+        activity = []
+        for download in recent_downloads:
+            activity.append(_activity_item(
+                'download', 'fas fa-download',
+                download.application.name,
+                'New tracked download',
+                download.downloaded_at,
+                reverse('dashboard:app_detail', args=[download.application_id]),
+                'accent',
+            ))
+        for message in ContactMessage.objects.all()[:5]:
+            activity.append(_activity_item(
+                'message', 'fas fa-envelope',
+                message.name, message.subject, message.created_at,
+                reverse('dashboard:message_detail', args=[message.pk]),
+                'cyan',
+            ))
+        for subscriber in NewsletterSubscriber.objects.all()[:5]:
+            activity.append(_activity_item(
+                'subscriber', 'fas fa-user-plus',
+                subscriber.name or subscriber.email,
+                'New newsletter subscriber', subscriber.created_at,
+                reverse('dashboard:subscriber_list'),
+                'green',
+            ))
+        for post in published_posts_qs.order_by('-published_at', '-created_at')[:5]:
+            activity.append(_activity_item(
+                'post', 'fas fa-newspaper',
+                post.title, 'Published article',
+                post.published_at or post.created_at,
+                reverse('dashboard:blog_edit', args=[post.pk]),
+                'amber',
+            ))
+        activity.sort(key=lambda item: item['timestamp'], reverse=True)
+
+        context.update({
+            'total_downloads': total_downloads,
+            'app_counter_total': app_counter_total,
+            'today_downloads': today_downloads,
+            'today_change': _percent_change(today_downloads, yesterday_downloads),
+            'week_downloads': week_downloads,
+            'week_change': _percent_change(week_downloads, previous_week_downloads),
+            'month_downloads': month_downloads,
+            'month_change': _percent_change(month_downloads, previous_month_downloads),
+            'unique_downloaders': unique_downloaders,
+            'registered_downloaders': registered_downloaders,
+            'app_download_stats': app_stats,
+            'app_download_total': app_download_total,
+            'total_apps': DesktopApplication.objects.count(),
+            'published_apps': DesktopApplication.objects.filter(published=True).count(),
+            'most_downloaded': next(
+                (item for item in app_stats if item['downloads'] > 0), None
+            ),
+            'recent_downloads': recent_downloads[:6],
+            'trend_data': trend_data,
+            'trend_days': trend_days,
+            'trend_range_choices': [7, 14, 30],
+            'platform_data': platform_data,
+            'published_posts': published_posts,
+            'total_blog_views': total_blog_views,
+            'total_comments': total_comments,
+            'approved_comments': approved_comments,
+            'pending_comments': pending_comments,
+            'total_likes': total_likes,
+            'active_subscribers': active_subscribers,
+            'new_subscribers_30d': new_subscribers_30d,
+            'total_messages': total_messages,
+            'unread_messages': unread_messages,
+            'messages_30d': messages_30d,
+            'content_counts': {
+                'desktop_apps': DesktopApplication.objects.filter(published=True).count(),
+                'web_projects': WebProject.objects.count(),
+                'mobile_apps': MobileApp.objects.count(),
+                'graphic_designs': GraphicDesignProject.objects.filter(published=True).count(),
+            },
+            'top_posts': top_posts,
+            'recent_activity': activity[:8],
+        })
         return context
 
 
