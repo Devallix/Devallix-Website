@@ -69,6 +69,10 @@ class DesktopApplication(models.Model):
     )
     website_url = models.URLField(blank=True)
     github_url = models.URLField(blank=True)
+    video_url = models.URLField(
+        'app video URL', blank=True,
+        help_text='YouTube URL for the app demo video.',
+    )
     featured = models.BooleanField(default=False)
     published = models.BooleanField(default=True)
     download_count = models.PositiveIntegerField(default=0)

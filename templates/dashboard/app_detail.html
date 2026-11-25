@@ -98,7 +98,7 @@
             </div>
             {% endif %}
 
-            {% if application.website_url or application.github_url %}
+            {% if application.website_url or application.github_url or application.video_url %}
             <div class="dashboard-card mb-4">
                 <h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-link me-1"></i> Links</h6>
                 <div class="d-flex gap-2">
@@ -110,6 +110,11 @@
                     {% if application.github_url %}
                     <a href="{{ application.github_url }}" target="_blank" class="btn btn-outline-accent btn-sm">
                         <i class="fab fa-github me-1"></i> GitHub
+                    </a>
+                    {% endif %}
+                    {% if application.video_url %}
+                    <a href="{{ application.video_url }}" target="_blank" class="btn btn-outline-accent btn-sm">
+                        <i class="fab fa-youtube me-1"></i> App Video
                     </a>
                     {% endif %}
                 </div>

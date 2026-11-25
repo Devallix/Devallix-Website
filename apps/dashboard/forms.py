@@ -33,7 +33,7 @@ class AppForm(forms.ModelForm):
             'name', 'category', 'short_description', 'description', 'version',
             'platform', 'license_type', 'file_size', 'release_date',
             'minimum_requirements', 'installation_instructions', 'logo', 'banner',
-            'installer_url', 'zip_url', 'website_url', 'github_url',
+            'installer_url', 'zip_url', 'website_url', 'github_url', 'video_url',
             'featured', 'published', 'meta_title', 'meta_description',
         ]
         widgets = {
@@ -47,6 +47,7 @@ class AppForm(forms.ModelForm):
             'installation_instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'website_url': forms.URLInput(attrs={'class': 'form-control'}),
             'github_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'video_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.youtube.com/watch?v=...'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'category': forms.Select(attrs={'class': 'form-select'}),
@@ -62,6 +63,7 @@ class AppForm(forms.ModelForm):
         labels = {
             'installer_url': 'Installer file URL',
             'zip_url': 'ZIP file URL',
+            'video_url': 'App video URL',
         }
 
     def __init__(self, *args, **kwargs):
@@ -106,6 +108,9 @@ class AppForm(forms.ModelForm):
             Row(
                 Column('website_url', css_class='col-md-6'),
                 Column('github_url', css_class='col-md-6'),
+            ),
+            Row(
+                Column('video_url', css_class='col-md-6'),
             ),
             HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
             HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-2"></i>Settings</h6>'),
@@ -533,12 +538,12 @@ class SiteSettingsForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'github_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'linkedin_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'twitter_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'youtube_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'facebook_url': forms.URLInput(attrs={'class': 'form-control'}),
-            'instagram_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'github_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/username'}),
+            'linkedin_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.linkedin.com/in/username'}),
+            'twitter_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://x.com/username'}),
+            'youtube_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.youtube.com/@channel'}),
+            'facebook_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.facebook.com/username'}),
+            'instagram_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://www.instagram.com/username'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'meta_keywords': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
@@ -547,6 +552,14 @@ class SiteSettingsForm(forms.ModelForm):
             'favicon': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'about_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'og_image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'github_url': 'GitHub URL',
+            'linkedin_url': 'LinkedIn URL',
+            'twitter_url': 'Twitter / X URL',
+            'youtube_url': 'YouTube URL',
+            'facebook_url': 'Facebook URL',
+            'instagram_url': 'Instagram URL',
         }
 
     def __init__(self, *args, **kwargs):
