@@ -215,8 +215,13 @@
                     </a>
                     {% endif %}
                     {% if app.github_url %}
-                    <a href="{{ app.github_url }}" class="d-flex align-items-center gap-2" target="_blank" style="color:var(--text-muted);">
+                    <a href="{{ app.github_url }}" class="d-flex align-items-center gap-2 mb-2" target="_blank" rel="noopener" style="color:var(--text-muted);">
                         <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                    {% endif %}
+                    {% if app.video_url %}
+                    <a href="{{ app.video_url }}" class="d-flex align-items-center gap-2" target="_blank" rel="noopener" style="color:var(--text-muted);">
+                        <i class="fab fa-youtube"></i> Watch App Video
                     </a>
                     {% endif %}
                 </div>
