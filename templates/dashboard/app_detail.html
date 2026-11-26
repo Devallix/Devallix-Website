@@ -67,6 +67,7 @@
                             {% if application.featured %}
                             <span style="background:rgba(182,255,0,0.15);color:var(--accent);padding:3px 8px;border-radius:6px;font-size:0.75rem;margin-left:4px;">Featured</span>
                             {% endif %}
+                            {% include 'includes/app_microsoft_store_badge.html' with app=application %}
                         </div>
                     </div>
                 </div>

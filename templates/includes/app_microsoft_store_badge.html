@@ -1,0 +1,25 @@
+{% if app.microsoft_store_available %}
+<span class="ms-store-badge ms-store-badge--available" title="Available on Microsoft Store">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 8h16l-1 13H5L4 8z" fill="#ffffff" opacity="0.92"></path>
+        <path d="M9 8V5.5a3 3 0 0 1 6 0V8" fill="none" stroke="#ffffff" stroke-width="1.8"></path>
+        <rect x="6.5" y="10.5" width="5" height="5" fill="#f25022"></rect>
+        <rect x="12.5" y="10.5" width="5" height="5" fill="#7fba00"></rect>
+        <rect x="6.5" y="15.5" width="5" height="5" fill="#00a4ef"></rect>
+        <rect x="12.5" y="15.5" width="5" height="5" fill="#ffb900"></rect>
+    </svg>
+    <span>Microsoft Store &mdash; Available</span>
+</span>
+{% elif app.microsoft_store_coming_soon %}
+<span class="ms-store-badge ms-store-badge--soon" title="Coming soon to Microsoft Store">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 8h16l-1 13H5L4 8z" fill="#ffffff" opacity="0.92"></path>
+        <path d="M9 8V5.5a3 3 0 0 1 6 0V8" fill="none" stroke="#ffffff" stroke-width="1.8"></path>
+        <rect x="6.5" y="10.5" width="5" height="5" fill="#f25022"></rect>
+        <rect x="12.5" y="10.5" width="5" height="5" fill="#7fba00"></rect>
+        <rect x="6.5" y="15.5" width="5" height="5" fill="#00a4ef"></rect>
+        <rect x="12.5" y="15.5" width="5" height="5" fill="#ffb900"></rect>
+    </svg>
+    <span>Microsoft Store &mdash; Coming soon</span>
+</span>
+{% endif %}

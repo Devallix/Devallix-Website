@@ -73,6 +73,14 @@ class DesktopApplication(models.Model):
         'app video URL', blank=True,
         help_text='YouTube URL for the app demo video.',
     )
+    microsoft_store_available = models.BooleanField(
+        'available on Microsoft Store', default=False,
+        help_text='Check if this app is live on the Microsoft Store.',
+    )
+    microsoft_store_coming_soon = models.BooleanField(
+        'coming soon to Microsoft Store', default=False,
+        help_text='Check if a Microsoft Store release is planned but not live yet.',
+    )
     featured = models.BooleanField(default=False)
     published = models.BooleanField(default=True)
     download_count = models.PositiveIntegerField(default=0)

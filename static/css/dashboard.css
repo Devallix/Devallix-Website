@@ -898,6 +898,37 @@ a { text-decoration: none; color: inherit; transition: all 0.2s; }
 .analytics-table th,
 .analytics-table td { padding: 0.8rem 0.9rem; }
 
+/* Microsoft Store availability badge */
+.ms-store-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+}
+
+.ms-store-badge svg {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.ms-store-badge--available {
+    background: rgba(0, 164, 239, 0.16);
+    color: #8edcff;
+    border: 1px solid rgba(0, 164, 239, 0.45);
+}
+
+.ms-store-badge--soon {
+    background: rgba(255, 185, 0, 0.14);
+    color: #ffd06b;
+    border: 1px solid rgba(255, 185, 0, 0.38);
+}
+
 .analytics-app-logo {
     width: 34px;
     height: 34px;

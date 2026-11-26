@@ -34,6 +34,7 @@ class AppForm(forms.ModelForm):
             'platform', 'license_type', 'file_size', 'release_date',
             'minimum_requirements', 'installation_instructions', 'logo', 'banner',
             'installer_url', 'zip_url', 'website_url', 'github_url', 'video_url',
+            'microsoft_store_available', 'microsoft_store_coming_soon',
             'featured', 'published', 'meta_title', 'meta_description',
         ]
         widgets = {
@@ -59,12 +60,22 @@ class AppForm(forms.ModelForm):
             'zip_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/you/app/archive/refs/tags/v1.0.0.zip'}),
             'featured': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'microsoft_store_available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'microsoft_store_coming_soon': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
             'installer_url': 'Installer file URL',
             'zip_url': 'ZIP file URL',
             'video_url': 'App video URL',
+            'microsoft_store_available': 'Available on Microsoft Store',
+            'microsoft_store_coming_soon': 'Coming soon to Microsoft Store',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('microsoft_store_available'):
+            cleaned_data['microsoft_store_coming_soon'] = False
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,6 +122,12 @@ class AppForm(forms.ModelForm):
             ),
             Row(
                 Column('video_url', css_class='col-md-6'),
+            ),
+            HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
+            HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fab fa-windows me-2"></i>Microsoft Store</h6>'),
+            Row(
+                Column('microsoft_store_available', css_class='col-md-6'),
+                Column('microsoft_store_coming_soon', css_class='col-md-6'),
             ),
             HTML('<hr class="my-4" style="border-color:var(--border-color);">'),
             HTML('<h6 class="fw-bold mb-3" style="color:var(--accent);"><i class="fas fa-cog me-2"></i>Settings</h6>'),
